@@ -1,0 +1,26 @@
+{
+  "name": "@platforma-open/milaboratories.FastQC.ui",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "watch": "vue-tsc && vite build --watch",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@platforma-open/milaboratories.FastQC.model": "workspace:*",
+    "@platforma-sdk/ui-vue": "catalog:",
+    "ag-grid-enterprise": "catalog:",
+    "ag-grid-vue3": "catalog:",
+    "@milaboratories/graph-maker": "catalog:",
+    "vue": "catalog:",
+    "@platforma-sdk/model": "catalog:"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vue-tsc": "catalog:"
+  }
+}

@@ -1,0 +1,109 @@
+self := import("@platforma-sdk/workflow-tengo:tpl")
+
+json := import("json")
+
+ll := import("@platforma-sdk/workflow-tengo:ll")
+exec := import("@platforma-sdk/workflow-tengo:exec")
+file := import("@platforma-sdk/workflow-tengo:file")
+// assets := import("@platforma-sdk/workflow-tengo:assets")
+pframes := import("@platforma-sdk/workflow-tengo:pframes")
+pConstants := import("@platforma-sdk/workflow-tengo:pframes.constants")
+
+
+
+self.defineOutputs("FastQCzip_r1",
+	"FastQChtml_r1",
+    "FastQCzip_r2",
+	"FastQChtml_r2",
+    "fastqcLog")
+
+
+self.body(func(inputs) {
+	inputData := inputs[pConstants.VALUE_FIELD_NAME]
+	blockId := inputs.blockId
+	fileExtension := inputs.fileExtension
+
+    fastqcRun := exec.builder().
+                cmd("/Users/julen/Programs/FastQC_v0.12.1/fastqc").
+                // Force output in working folder (default data folder)
+                arg("-o").arg(".").
+                // CPUs per fastq pair (or per fastq if not paired)
+                arg("-t").arg("1")
+                // Input fastq files added below
+    
+
+
+    // get files by index
+	filesByRIndex := {}
+	for sKey, inputFile in inputData.inputs() {
+		key := json.decode(sKey)
+		r := key[0]
+		if (r[0] != 'R' && r[0] != "I") || (r[1] != '1' && r[1] != '2') || len(r) != 2 {
+			ll.panic("malformed read index: %v", r)
+		}
+		filesByRIndex[r] = inputFile
+	}
+
+	nReads := 0
+
+	for rIndex in ["R1", "R2"] {
+		inputFile := filesByRIndex[rIndex]
+        // single end case
+		if is_undefined(inputFile) {
+			continue
+		}
+		nReads = nReads + 1
+		fileName := "input_" + rIndex + "." + fileExtension
+        outZip := "input_" + rIndex + "_fastqc.zip"
+        outHtml := "input_" + rIndex + "_fastqc.html"
+		ll.print("print fileName in loop", fileName)
+        // Include files in working enironment
+		fastqcRun = fastqcRun.
+            addFile(fileName, inputFile).
+			arg(fileName).
+            saveFile(outZip).
+            saveFile(outHtml)
+	}
+    
+    ll.assert(nReads != 0, "No read indexes")
+
+    fastqcRun = fastqcRun.
+        printErrStreamToStdout().
+		saveStdoutContent().
+		cache(24 * 60 * 60 * 1000).
+		run()
+	
+    // Store standard output for analysis progress bar
+    fastqcLog := fastqcRun.getStdoutStream()
+    // stderr has the progress percentages until 95%
+    /* Started analysis of subsampled20_SRR22319482_1.fastq.gz
+       Approx 5% complete for subsampled20_SRR22319482_1.fastq.gz
+       Approx 10% complete for subsampled20_SRR22319482_1.fastq.gz
+       ...
+       Approx 95% complete for subsampled20_SRR22319482_1.fastq.gz
+    */
+
+    // stdout has the finish confirmation
+    /* application/octet-stream
+      Analysis complete for subsampled20_SRR22319482_1.fastq.gz   
+    */ 
+
+    // get output files
+    FastQCzip_r1 := fastqcRun.getFile("input_R1_fastqc.zip")
+    FastQChtml_r1 := fastqcRun.getFile("input_R1_fastqc.html")
+
+    FastQCzip_r2 := fastqcRun.getFile("input_R2_fastqc.zip")
+    FastQChtml_r2 := fastqcRun.getFile("input_R2_fastqc.html")
+
+    
+	output := {
+		FastQCzip_r1: file.exportFile(FastQCzip_r1),
+		FastQChtml_r1: file.exportFile(FastQChtml_r1),
+        FastQCzip_r2: file.exportFile(FastQCzip_r2),
+		FastQChtml_r2: file.exportFile(FastQChtml_r2),
+        fastqcLog: fastqcLog
+	}
+
+	return output
+
+})
