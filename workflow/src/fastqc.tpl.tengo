@@ -15,7 +15,7 @@ self.defineOutputs("FastQCzip_r1",
 	"FastQChtml_r1",
     "FastQCzip_r2",
 	"FastQChtml_r2",
-    "fastqcLog")
+    "fastqcStdout")
 
 
 self.body(func(inputs) {
@@ -30,6 +30,7 @@ self.body(func(inputs) {
                 // CPUs per fastq pair (or per fastq if not paired)
                 arg("-t").arg("1")
                 // Input fastq files added below
+                
     
 
 
@@ -74,7 +75,8 @@ self.body(func(inputs) {
 		run()
 	
     // Store standard output for analysis progress bar
-    fastqcLog := fastqcRun.getStdoutStream()
+    fastqcStdout := fastqcRun.getStdoutStream()
+    // fastqcStdout := fastqcRun.getFile("stdout.txt")
     // stderr has the progress percentages until 95%
     /* Started analysis of subsampled20_SRR22319482_1.fastq.gz
        Approx 5% complete for subsampled20_SRR22319482_1.fastq.gz
@@ -101,7 +103,7 @@ self.body(func(inputs) {
 		FastQChtml_r1: file.exportFile(FastQChtml_r1),
         FastQCzip_r2: file.exportFile(FastQCzip_r2),
 		FastQChtml_r2: file.exportFile(FastQChtml_r2),
-        fastqcLog: fastqcLog
+        fastqcStdout: fastqcStdout
 	}
 
 	return output

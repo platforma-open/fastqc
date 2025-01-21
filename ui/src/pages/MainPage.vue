@@ -3,9 +3,9 @@ import { AgGridVue } from 'ag-grid-vue3';
 import { useApp } from '../app';
 import { computed, reactive, shallowRef } from "vue";
 import { PlRef, plRefsEqual } from '@platforma-sdk/model';
-import { AgGridTheme, PlAgCellFile, PlAgOverlayLoading, PlAgOverlayNoRows, 
+import { AgGridTheme, PlAgOverlayLoading, PlAgOverlayNoRows, 
   PlAgTextAndButtonCell, PlBlockPage, PlBtnGhost, PlDropdownRef, 
-  PlMaskIcon24, PlProgressCell, PlSlideModal } from '@platforma-sdk/ui-vue';
+  PlMaskIcon24, PlSlideModal } from '@platforma-sdk/ui-vue';
 import { ColDef, GridApi, GridOptions, GridReadyEvent } from 'ag-grid-enterprise';
 import ProgressCell from './components/ProgressCell.vue';
 import { resultMap } from './results';
@@ -31,8 +31,7 @@ const results = computed<any[] | undefined>(() => {
       rows.push({
         "sampleId": id,
         "sampleLabel": resultMap.value[id].sampleLabel,
-        // "fastqc": resultMap.value[id].fastqcProgressLine, // @TODO status?
-
+        "fastqc": resultMap.value[id].fastqcProgressLine, 
       });
   }
 
@@ -51,17 +50,17 @@ const columnDefs: ColDef[] = [
     cellRendererParams: {
       invokeRowsOnDoubleClick: true
     }
-  }//,
-  // {
-  //   colId: 'fastqc',
-  //   field: 'fastqc',
-  //   cellRenderer: ProgressCell,
-  //   headerName: 'FastQC Progress',
-  //   cellStyle: {
-  //     '--ag-cell-horizontal-padding': '0px',
-  //     '--ag-cell-vertical-padding': '0px'
-  //   },
-  // },
+  },
+  {
+    colId: 'fastqc',
+    field: 'fastqc',
+    cellRenderer: ProgressCell,
+    headerName: 'FastQC Progress',
+    cellStyle: {
+      '--ag-cell-horizontal-padding': '0px',
+      '--ag-cell-vertical-padding': '0px'
+    },
+  }
 ];
 
 const gridOptions: GridOptions = {
@@ -72,7 +71,7 @@ const gridOptions: GridOptions = {
   // },
   components: {
     PlAgTextAndButtonCell,
-    // ProgressCell
+    ProgressCell
     //     ProgressCell,
     //     ChainsStatsCell
   }

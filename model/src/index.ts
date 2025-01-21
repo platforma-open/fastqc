@@ -32,6 +32,9 @@ export const model = BlockModel.create()
   .withUiState<UiState>({
   })
 
+  // Activate "Run" button only after these conditions get fulfilled
+  .argsValid((ctx) =>  ctx.args.refData !== undefined)
+
    /**
    * Find possible options for the fastq input
    */
@@ -44,7 +47,9 @@ export const model = BlockModel.create()
         (v.valueType as string) === "File" &&
         domain !== undefined &&
         (domain["pl7.app/fileExtension"] === "fastq" ||
-          domain["pl7.app/fileExtension"] === "fastq.gz")
+         domain["pl7.app/fileExtension"] === "fastq.gz" ||
+         domain["pl7.app/fileExtension"] === "fq" ||
+         domain["pl7.app/fileExtension"] === "fq.gz")
       );
     });
   })
@@ -72,24 +77,24 @@ export const model = BlockModel.create()
     /**
    * QC progress
    */
-  // .output("fastqcProgress", (wf) => {
-  //   return parseResourceMap(
-  //     wf.outputs?.resolve("fastqcLog"),
-  //     (acc) => acc.getLogHandle(),
-  //     false
-  //     );
-  //   })
-  
+  .output("fastqcProgress", (wf) => {
+    return parseResourceMap(
+      wf.outputs?.resolve("fastqcStdout"),
+      (acc) => acc.getLogHandle(),
+      false
+      );
+    })
+
     /**
      * Last line from FastQC log output
      */
-  // .output("fastqcProgressLine", (wf) => {
-  //   return parseResourceMap(
-  //     wf.outputs?.resolve("fastqcLog"),
-  //     (acc) => acc.getLastLogs(1),
-  //     false
-  //   );
-  //   })
+  .output("fastqcProgressLine", (wf) => {
+    return parseResourceMap(
+      wf.outputs?.resolve("fastqcStdout"),
+      (acc) => acc.getLastLogs(1),
+      false
+    );
+    })
 
 
   .output("fastqcZipPf_r1", (wf) => {

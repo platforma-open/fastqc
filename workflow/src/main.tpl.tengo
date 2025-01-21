@@ -26,10 +26,6 @@ wf.body(func(args) {
 	// Fastq or Fastq.gz
 	fileExtension := inputSpec.domain["pl7.app/fileExtension"]
 
-	// Modify this in de future to store reference to FastQC output zip
-	fastQCzip := "Hello from Tengo, " + args.name + "!"
-
-
 	aggregationTargets := [{
 		type: "Resource",
 		name: "FastQCzip_r1"
@@ -42,6 +38,9 @@ wf.body(func(args) {
 	}, {
 		type: "Resource",
 		name: "FastQChtml_r2"
+	},{
+		type: "Resource",
+		name: "fastqcStdout"
 	}]
 
 	fastqcResults := llPFrames.aggregate(
@@ -113,7 +112,7 @@ wf.body(func(args) {
 
 	return {
 		outputs: {
-			// fastqcLog: fastqcResults.output("fastqcLog"),
+			fastqcStdout: fastqcResults.output("fastqcStdout"),
 			fastqcZipPf_r1: fastqcZipPf_r1,
 			fastqcZipPf_r2: fastqcZipPf_r2
 			
