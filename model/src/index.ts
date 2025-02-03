@@ -1,4 +1,5 @@
-import { BlockModel, InferOutputsType, isPColumnSpec, parseResourceMap, PlRef } from '@platforma-sdk/model';
+import { BlockModel, getResourceField, InferOutputsType, isPColumnSpec, 
+  MainOutputs, parseResourceMap, PlRef, extractArchiveAndGetURL } from '@platforma-sdk/model';
 
 /**
  * Block arguments coming from the user interface
@@ -79,7 +80,7 @@ export const model = BlockModel.create()
    */
   .output("fastqcProgress", (wf) => {
     return parseResourceMap(
-      wf.outputs?.resolve("fastqcStdout"),
+      wf.outputs?.resolve("fastQCstdout"),
       (acc) => acc.getLogHandle(),
       false
       );
@@ -90,28 +91,60 @@ export const model = BlockModel.create()
      */
   .output("fastqcProgressLine", (wf) => {
     return parseResourceMap(
-      wf.outputs?.resolve("fastqcStdout"),
+      wf.outputs?.resolve("fastQCstdout"),
       (acc) => acc.getLastLogs(1),
       false
     );
     })
 
 
-  .output("fastqcZipPf_r1", (wf) => {
-    //return wf.outputs?.resolve("pf")?.resolve("rawCounts.data")?.listInputFields()
-    const pCols = wf.outputs?.resolve("fastqcZipPf_r1")?.getPColumns();
-    if (pCols === undefined) return undefined;
+  // .output("fastqcZipPf_r1", (wf) => {
+  //   //return wf.outputs?.resolve("pf")?.resolve("rawCounts.data")?.listInputFields()
+  //   const pCols = wf.outputs?.resolve("fastqcZipPf_r1")?.getPColumns();
+  //   if (pCols === undefined) return undefined;
 
-    return pCols;
-  })
+  //   return pCols;
+  // })
 
-  .output("fastqcZipPf_r2", (wf) => {
-    //return wf.outputs?.resolve("pf")?.resolve("rawCounts.data")?.listInputFields()
-    const pCols = wf.outputs?.resolve("fastqcZipPf_r2")?.getPColumns();
-    if (pCols === undefined) return undefined;
+  // .output("fastqcZipPf_r2", (wf) => {
+  //   //return wf.outputs?.resolve("pf")?.resolve("rawCounts.data")?.listInputFields()
+  //   const pCols = wf.outputs?.resolve("fastqcZipPf_r2")?.getPColumns();
+  //   if (pCols === undefined) return undefined;
 
-    return pCols;
-  })
+  //   return pCols;
+  // })
+
+  .output('fastqcZip_r1', (wf) => {
+    return parseResourceMap(
+      wf.outputs?.resolve("FastQCzip_r1"),
+      (acc) => acc.extractArchiveAndGetURL('zip'),
+      false
+    );
+
+    }
+  )
+
+  .output('fastqcZip_r2', (wf) => {
+    return parseResourceMap(
+      wf.outputs?.resolve("FastQCzip_r2"),
+      (acc) => acc.extractArchiveAndGetURL('zip'),
+      false
+    );
+
+    }
+  )
+
+  .output('test_fastqcZip_r1', (wf) => {
+    return  wf.outputs?.resolve("FastQCzip_r1");
+
+    }
+  )
+
+  .output('test_fastqcZip_r2', (wf) => {
+    return  wf.outputs?.resolve("FastQCzip_r2");
+
+    }
+  )
 
   .sections([
     { type: 'link', href: '/', label: 'Main' }

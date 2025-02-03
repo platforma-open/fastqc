@@ -18,11 +18,12 @@ export const resultMap = computed(
       const labels = app.model.outputs.labels;
       if (labels === undefined) return undefined;
 
-      const starProgress = app.model.outputs.fastqcProgress;
-      if (starProgress === undefined) return undefined;
+      // RENAME WELL
+      const fastqcProgress = app.model.outputs.fastqcProgress;
+      if (fastqcProgress === undefined) return undefined;
   
       const r: Record<string, ResultEntry> = {};
-      for (const prog of starProgress.data) {
+      for (const prog of fastqcProgress.data) {
         const sampleId = prog.key[0];
         r[sampleId] = {
           sampleLabel: labels[sampleId],

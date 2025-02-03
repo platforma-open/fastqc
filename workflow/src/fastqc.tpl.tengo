@@ -5,7 +5,7 @@ json := import("json")
 ll := import("@platforma-sdk/workflow-tengo:ll")
 exec := import("@platforma-sdk/workflow-tengo:exec")
 file := import("@platforma-sdk/workflow-tengo:file")
-// assets := import("@platforma-sdk/workflow-tengo:assets")
+assets := import("@platforma-sdk/workflow-tengo:assets")
 pframes := import("@platforma-sdk/workflow-tengo:pframes")
 pConstants := import("@platforma-sdk/workflow-tengo:pframes.constants")
 
@@ -15,7 +15,7 @@ self.defineOutputs("FastQCzip_r1",
 	"FastQChtml_r1",
     "FastQCzip_r2",
 	"FastQChtml_r2",
-    "fastqcStdout")
+    "fastQCstdout")
 
 
 self.body(func(inputs) {
@@ -24,6 +24,7 @@ self.body(func(inputs) {
 	fileExtension := inputs.fileExtension
 
     fastqcRun := exec.builder().
+                // software(assets.importSoftware("@platforma-open/milaboratories.software-fastqc.software:fastqc")).
                 cmd("/Users/julen/Programs/FastQC_v0.12.1/fastqc").
                 // Force output in working folder (default data folder)
                 arg("-o").arg(".").
@@ -75,7 +76,7 @@ self.body(func(inputs) {
 		run()
 	
     // Store standard output for analysis progress bar
-    fastqcStdout := fastqcRun.getStdoutStream()
+    fastQCstdout := fastqcRun.getStdoutStream()
     // fastqcStdout := fastqcRun.getFile("stdout.txt")
     // stderr has the progress percentages until 95%
     /* Started analysis of subsampled20_SRR22319482_1.fastq.gz
@@ -103,7 +104,7 @@ self.body(func(inputs) {
 		FastQChtml_r1: file.exportFile(FastQChtml_r1),
         FastQCzip_r2: file.exportFile(FastQCzip_r2),
 		FastQChtml_r2: file.exportFile(FastQChtml_r2),
-        fastqcStdout: fastqcStdout
+        fastQCstdout: fastQCstdout
 	}
 
 	return output

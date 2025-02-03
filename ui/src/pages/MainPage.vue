@@ -3,20 +3,23 @@ import { AgGridVue } from 'ag-grid-vue3';
 import { useApp } from '../app';
 import { computed, reactive, shallowRef } from "vue";
 import { PlRef, plRefsEqual } from '@platforma-sdk/model';
-import {
-  AgGridTheme, PlAgOverlayLoading, PlAgOverlayNoRows,
-  PlAgTextAndButtonCell, PlBlockPage, PlBtnGhost, PlDropdownRef,
-  PlMaskIcon24, PlSlideModal, PlAgCellProgress
-} from '@platforma-sdk/ui-vue';
+import { AgGridTheme, PlAgCellProgress, PlAgOverlayLoading, PlAgOverlayNoRows, 
+  PlAgTextAndButtonCell, PlBlockPage, PlBtnGhost, PlDropdownRef, 
+  PlMaskIcon24, PlSlideModal } from '@platforma-sdk/ui-vue';
 import { ColDef, GridApi, GridOptions, GridReadyEvent } from 'ag-grid-enterprise';
 import { resultMap } from './results';
+import ReportPanel from './ReportPanel.vue';
 
 const app = useApp();
 
 const data = reactive<{
   settingsOpen: boolean,
+  fastqcReportOpen: boolean,
+  selectedSample: string | undefined
 }>({
   settingsOpen: app.model.args.refData === undefined,
+  fastqcReportOpen: false,
+  selectedSample: undefined
 })
 
 // Needed for analysis stage table
@@ -46,7 +49,7 @@ const results = computed<FastQCOverviewRow[] | undefined>(() => {
 
 const ProgressPattern = /Approx ([0-9]+)\%/
 
-const columnDefs: ColDef<FastQCOverviewRow>[] = [
+const columnDefs: ColDef[] = [
   {
     colId: 'label',
     field: 'sampleLabel',
@@ -62,7 +65,6 @@ const columnDefs: ColDef<FastQCOverviewRow>[] = [
   {
     colId: 'fastqc',
     cellRendererSelector: (cellData) => {
-
       if (cellData.data?.progress === undefined)
         return {
           component: PlAgCellProgress,
@@ -98,23 +100,24 @@ const columnDefs: ColDef<FastQCOverviewRow>[] = [
           stage: 'running',
         },
       };
-    },
-    headerName: 'FastQC Progress',
-    cellStyle: {
-      '--ag-cell-horizontal-padding': '0px',
-      '--ag-cell-vertical-padding': '0px'
-    },
-  }
+      },
+      headerName: 'FastQC Progress',
+      cellStyle: {
+        '--ag-cell-horizontal-padding': '0px',
+        '--ag-cell-vertical-padding': '0px'
+      },
+  },
 ];
 
 const gridOptions: GridOptions = {
   getRowId: (row) => row.data.sampleId,
-  // onRowDoubleClicked: (e) => {
-  //   data.selectedSample = e.data?.sampleId
-  //   data.sampleReportOpen = data.selectedSample !== undefined;
-  // },
+  onRowDoubleClicked: (e) => {
+    data.selectedSample = e.data?.sampleId
+    data.fastqcReportOpen = data.selectedSample !== undefined;
+  },
   components: {
-    PlAgTextAndButtonCell
+    PlAgTextAndButtonCell,
+    // PlProgressCell
     //     ProgressCell,
     //     ChainsStatsCell
   }
@@ -137,7 +140,7 @@ function setInput(inputRef?: PlRef) {
 </script>
 
 <template>
-  <PlBlockPage>
+    <PlBlockPage>
     <!-- Include setting button to open Dataset sliding window -->
     <template #title>FastQC analysis</template>
     <template #append>
@@ -150,17 +153,33 @@ function setInput(inputRef?: PlRef) {
     </template>
 
     <!-- Table showing analysis stage of files from selected dataset -->
-    <AgGridVue :theme="AgGridTheme" :style="{ height: '100%' }" @grid-ready="onGridReady" :rowData="results"
-      :columnDefs="columnDefs" :grid-options="gridOptions" :loadingOverlayComponentParams="{ notReady: true }"
+    <AgGridVue :theme="AgGridTheme" :style="{ height: '100%' }" 
+      @grid-ready="onGridReady" 
+      :rowData="results" 
+      :columnDefs="columnDefs" 
+      :grid-options="gridOptions" :loadingOverlayComponentParams="{ notReady: true }"
       :defaultColDef="defaultColDef" :loadingOverlayComponent=PlAgOverlayLoading
       :noRowsOverlayComponent=PlAgOverlayNoRows />
+      
+    <!-- These lines open the html -->
+    <!-- <div v-for="r1 in app.model.outputs.fastqcZip_r1?.data">
+      <iframe title="Frame" width="600" height="600" :src="(r1 as any).value+'/input_R1_fastqc/fastqc_report.html'" />
+    </div>  -->
 
   </PlBlockPage>
 
   <!-- Dataset sliding window to select input Dataset -->
   <PlSlideModal v-model="data.settingsOpen">
     <template #title>Settings</template>
-    <PlDropdownRef :options="app.model.outputs.dataOptions" v-model="app.model.args.refData"
-      @update:model-value="setInput" label="Select dataset" clearable />
+    <PlDropdownRef :options="app.model.outputs.dataOptions" v-model="app.model.args.refData" 
+      @update:model-value="setInput"
+      label="Select dataset" clearable />
+  </PlSlideModal>
+
+  <!-- Slide window with results -->
+  <PlSlideModal v-model="data.fastqcReportOpen" width="95%">
+    <template #title>Results for {{ (data.selectedSample ? app.model.outputs.labels?.[data.selectedSample] :
+      undefined) ?? "..." }}</template>
+    <ReportPanel v-model="data.selectedSample" />
   </PlSlideModal>
 </template>
