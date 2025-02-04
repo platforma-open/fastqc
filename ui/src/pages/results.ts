@@ -18,7 +18,6 @@ export const resultMap = computed(
       const labels = app.model.outputs.labels;
       if (labels === undefined) return undefined;
 
-      // RENAME WELL
       const fastqcProgress = app.model.outputs.fastqcProgress;
       if (fastqcProgress === undefined) return undefined;
   

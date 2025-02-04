@@ -48,7 +48,7 @@ const results = computed<FastQCOverviewRow[] | undefined>(() => {
 });
 
 const ProgressPattern = /Approx ([0-9]+)\%/
-
+// How to display content in table
 const columnDefs: ColDef[] = [
   {
     colId: 'label',
@@ -117,9 +117,6 @@ const gridOptions: GridOptions = {
   },
   components: {
     PlAgTextAndButtonCell,
-    // PlProgressCell
-    //     ProgressCell,
-    //     ChainsStatsCell
   }
 };
 
@@ -160,12 +157,6 @@ function setInput(inputRef?: PlRef) {
       :grid-options="gridOptions" :loadingOverlayComponentParams="{ notReady: true }"
       :defaultColDef="defaultColDef" :loadingOverlayComponent=PlAgOverlayLoading
       :noRowsOverlayComponent=PlAgOverlayNoRows />
-      
-    <!-- These lines open the html -->
-    <!-- <div v-for="r1 in app.model.outputs.fastqcZip_r1?.data">
-      <iframe title="Frame" width="600" height="600" :src="(r1 as any).value+'/input_R1_fastqc/fastqc_report.html'" />
-    </div>  -->
-
   </PlBlockPage>
 
   <!-- Dataset sliding window to select input Dataset -->

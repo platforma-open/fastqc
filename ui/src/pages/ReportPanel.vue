@@ -19,6 +19,7 @@ const options = [{
 // Reference to tab opened by default
 const currentView = ref('R1')
 
+// Reference to R1 html zip file of current sample
 const reportSrcR1 = computed(() => {
     const id = sampleId.value
     if (id === undefined) {
@@ -31,7 +32,7 @@ const reportSrcR1 = computed(() => {
 
 });
 
-// TODO change name
+// Reference to R2 html zip file of current sample
 const reportSrcR2 = computed(() => {
     const id = sampleId.value
     if (id === undefined) {
@@ -47,7 +48,9 @@ const reportSrcR2 = computed(() => {
 </script>
 
 <template>
+    <!-- Buttons displayed on top of sliding window -->
     <PlBtnGroup v-model="currentView" :options="options" />
+    
     <template v-if="currentView === 'R1'">
         <iframe v-if="reportSrcR1" title="Frame" width="1100" height="800" 
                 :src="reportSrcR1+'/input_R1_fastqc/fastqc_report.html'" />
