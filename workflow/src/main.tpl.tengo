@@ -1,4 +1,3 @@
-// "hello world"
 wf := import("@platforma-sdk/workflow-tengo:workflow")
 exec := import("@platforma-sdk/workflow-tengo:exec")
 assets:= import("@platforma-sdk/workflow-tengo:assets")
@@ -53,12 +52,13 @@ wf.body(func(args) {
 		}
 	)
 
-	// Create FastQC ZIP output specs
-	// fastqcZipPf_r1 := {
+	// @TODO: use it to allow html download from Platforma
+	// Create FastQC html output specs
+	// FastQChtmlR1Spec := {
 	// 	"fastQC.spec":
 	// 	{
 	// 		kind: "PColumn",
-	// 		name: "zipFile",
+	// 		name: "html",
 	// 		domain: {
 	// 			"pl7.app/blockId": blockId
 	// 		},
@@ -66,7 +66,7 @@ wf.body(func(args) {
 	// 		axesSpec: [
 	// 			inputSpec.axesSpec[0],
 	// 			{
-	// 				"name": "pl7.app/fastQC/zip",
+	// 				"name": "pl7.app/fastQC/html",
 	// 				"type": "String",
 	// 				"domain": {
 	// 					"pl7.app/blockId": blockId,
@@ -77,38 +77,10 @@ wf.body(func(args) {
 	// 				}
 	// 			}
 	// 			],
-	// 		annotations: {"pl7.app/label": "FastQC output Zip file"}
+	// 		annotations: {"pl7.app/label": "FastQC output html file"}
 	// 	},
-	// 	"fastQC.data": fastqcResults.output("FastQCzipR1")
+	// 	"fastQC.data": fastqcResults.output("FastQChtmlR1")
 	// }
-
-	fastqcZipPf_r2 := {
-		"fastQC.spec":
-		{
-			kind: "PColumn",
-			name: "zipFile",
-			domain: {
-				"pl7.app/blockId": blockId
-			},
-			valueType: "Double",
-			axesSpec: [
-				inputSpec.axesSpec[0],
-				{
-					"name": "pl7.app/fastQC/zip",
-					"type": "String",
-					"domain": {
-						"pl7.app/blockId": blockId,
-						"pl7.app/species": species
-					},
-					"annotations": {
-						"pl7.app/label": "FastQC"
-					}
-				}
-				],
-			annotations: {"pl7.app/label": "FastQC output Zip file"}
-		},
-		"fastQC.data": fastqcResults.output("FastQCzipR2")
-	}
 
 	return {
 		outputs: {

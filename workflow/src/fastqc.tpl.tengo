@@ -1,7 +1,5 @@
 self := import("@platforma-sdk/workflow-tengo:tpl")
-
 json := import("json")
-
 ll := import("@platforma-sdk/workflow-tengo:ll")
 exec := import("@platforma-sdk/workflow-tengo:exec")
 file := import("@platforma-sdk/workflow-tengo:file")
