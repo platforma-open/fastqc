@@ -1,9 +1,10 @@
 packages:
+  - software
   - workflow
   - model
   - ui
-  - test
   - block
+  - test
 
 catalog:
   "@platforma-sdk/model": ^1.22.2
@@ -13,8 +14,8 @@ catalog:
   "@platforma-sdk/test": ^1.22.5
   "@platforma-sdk/tengo-builder": ^1.17.5
   "@platforma-sdk/package-builder": ^2.15.0
-  '@platforma-open/milaboratories.software-small-binaries': ^1.15.6
-  '@platforma-open/milaboratories.software-fastqc': ^1.0.0
+  "@platforma-open/milaboratories.software-small-binaries": ^1.15.6
+  "@platforma-open/milaboratories.software-fastqc": ^1.0.1
 
   "@milaboratories/graph-maker": ^1.1.32
 
@@ -34,4 +35,5 @@ catalog:
   "vitest": ^2.1.8
   "@vitejs/plugin-vue": ^5.2.1
 
+  "unzipper": "^0.12.3"
   "@changesets/cli": ^2.27.11

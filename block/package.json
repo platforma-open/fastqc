@@ -37,7 +37,8 @@
     }
   },
   "devDependencies": {
-    "@platforma-sdk/block-tools": "catalog:"
+    "@platforma-sdk/block-tools": "catalog:",
+    "unzipper": "catalog:"
   },
   "packageManager": "pnpm@9.12.0"
 }
