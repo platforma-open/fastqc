@@ -97,26 +97,9 @@ export const model = BlockModel.create()
     );
     })
 
-
-  // .output("fastqcZipPf_r1", (wf) => {
-  //   //return wf.outputs?.resolve("pf")?.resolve("rawCounts.data")?.listInputFields()
-  //   const pCols = wf.outputs?.resolve("fastqcZipPf_r1")?.getPColumns();
-  //   if (pCols === undefined) return undefined;
-
-  //   return pCols;
-  // })
-
-  // .output("fastqcZipPf_r2", (wf) => {
-  //   //return wf.outputs?.resolve("pf")?.resolve("rawCounts.data")?.listInputFields()
-  //   const pCols = wf.outputs?.resolve("fastqcZipPf_r2")?.getPColumns();
-  //   if (pCols === undefined) return undefined;
-
-  //   return pCols;
-  // })
-
-  .output('fastqcZip_r1', (wf) => {
+  .output('FastQCzipR1', (wf) => {
     return parseResourceMap(
-      wf.outputs?.resolve("FastQCzip_r1"),
+      wf.outputs?.resolve("FastQCzipR1"),
       (acc) => acc.extractArchiveAndGetURL('zip'),
       false
     );
@@ -124,9 +107,9 @@ export const model = BlockModel.create()
     }
   )
 
-  .output('fastqcZip_r2', (wf) => {
+  .output('FastQCzipR2', (wf) => {
     return parseResourceMap(
-      wf.outputs?.resolve("FastQCzip_r2"),
+      wf.outputs?.resolve("FastQCzipR2"),
       (acc) => acc.extractArchiveAndGetURL('zip'),
       false
     );
@@ -134,14 +117,14 @@ export const model = BlockModel.create()
     }
   )
 
-  .output('test_fastqcZip_r1', (wf) => {
-    return  wf.outputs?.resolve("FastQCzip_r1");
+  .output('test_FastQCzipR1', (wf) => {
+    return  wf.outputs?.resolve("FastQCzipR1");
 
     }
   )
 
-  .output('test_fastqcZip_r2', (wf) => {
-    return  wf.outputs?.resolve("FastQCzip_r2");
+  .output('test_FastQCzipR2', (wf) => {
+    return  wf.outputs?.resolve("FastQCzipR2");
 
     }
   )
