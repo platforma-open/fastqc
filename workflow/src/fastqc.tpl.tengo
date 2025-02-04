@@ -24,7 +24,7 @@ self.body(func(inputs) {
 	fileExtension := inputs.fileExtension
 
     fastqcRun := exec.builder().
-                software(assets.importSoftware("@platforma-open/milaboratories.software-fastqc:0.12.1")).
+                software(assets.importSoftware("@platforma-open/milaboratories.software-fastqc:main")).
                 // cmd("/Users/julen/Programs/FastQC_v0.12.1/fastqc").
                 // Force output in working folder (default data folder)
                 arg("-o").arg(".").

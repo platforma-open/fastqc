@@ -15,7 +15,8 @@ catalog:
   "@platforma-sdk/tengo-builder": ^1.17.5
   "@platforma-sdk/package-builder": ^2.15.0
   "@platforma-open/milaboratories.software-small-binaries": ^1.15.6
-  "@platforma-open/milaboratories.software-fastqc": ^1.0.1
+  "@platforma-open/milaboratories.software-fastqc": ^1.0.6
+
 
   "@milaboratories/graph-maker": ^1.1.32
 
