@@ -28,7 +28,7 @@
       "description": "Fastq files QC analysis with FastQC program. It runs QC and produces a report html per file.",
       "longDescription": "file:../docs/description.md",
       "changelog": "file:../CHANGELOG.md",
-      "tags": ["tutorial"],
+      "tags": ["QC"],
       "organization": {
         "name": "MiLaboratories Inc",
         "url": "https://milaboratories.com/",
