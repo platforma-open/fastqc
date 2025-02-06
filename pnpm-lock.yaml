@@ -13,8 +13,8 @@ catalogs:
       specifier: ^1.1.32
       version: 1.1.32
     '@platforma-open/milaboratories.software-fastqc':
-      specifier: ^1.0.6
-      version: 1.0.6
+      specifier: ^1.0.7
+      version: 1.0.7
     '@platforma-open/milaboratories.software-small-binaries':
       specifier: ^1.15.6
       version: 1.15.6
@@ -179,7 +179,7 @@ importers:
     devDependencies:
       '@platforma-open/milaboratories.software-fastqc':
         specifier: 'catalog:'
-        version: 1.0.6
+        version: 1.0.7
       '@platforma-open/milaboratories.software-small-binaries':
         specifier: 'catalog:'
         version: 1.15.6
@@ -1080,8 +1080,8 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@platforma-open/milaboratories.software-fastqc@1.0.6':
-    resolution: {integrity: sha512-AdjEQn1v5+1VURcjgiOya7nubj07R9g8j8uGaA2cnMtLMlgZgbp7r4xD43PqxXo+bEtf1ah7nhxdmXWT6s6qOg==}
+  '@platforma-open/milaboratories.software-fastqc@1.0.7':
+    resolution: {integrity: sha512-oZ8DxvzxxgI1ky3hJt7exBeGTNHF+7XTjeJa7yyuNpm6lQo0dSyI/oIvFZayZoh6ct8M6ddhWESQERDC51ob1g==}
 
   '@platforma-open/milaboratories.software-small-binaries.guided-command@1.0.4':
     resolution: {integrity: sha512-LD8XQDnR+L9oRD7JXE0VWGmv1/0cm+J71flrwBUWeIbuaenPC8Nsza8oy7JjLJ8AX+bm8XAyyJALuqBBqkL95Q==}
@@ -6106,7 +6106,7 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@platforma-open/milaboratories.software-fastqc@1.0.6': {}
+  '@platforma-open/milaboratories.software-fastqc@1.0.7': {}
 
   '@platforma-open/milaboratories.software-small-binaries.guided-command@1.0.4': {}
 

@@ -36,9 +36,7 @@ export const model = BlockModel.create()
         (v.valueType as string) === "File" &&
         domain !== undefined &&
         (domain["pl7.app/fileExtension"] === "fastq" ||
-         domain["pl7.app/fileExtension"] === "fastq.gz" ||
-         domain["pl7.app/fileExtension"] === "fq" ||
-         domain["pl7.app/fileExtension"] === "fq.gz")
+         domain["pl7.app/fileExtension"] === "fastq.gz")
       );
     });
   })
