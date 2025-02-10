@@ -14,6 +14,8 @@ catalog:
   "@platforma-sdk/test": ^1.22.5
   "@platforma-sdk/tengo-builder": ^1.17.5
   "@platforma-sdk/package-builder": ^2.15.0
+  "@platforma-sdk/eslint-config": ^1.0.1
+
   "@platforma-open/milaboratories.software-small-binaries": ^1.15.6
   "@platforma-open/milaboratories.software-fastqc": ^1.0.7
 
