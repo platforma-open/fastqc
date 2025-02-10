@@ -1,26 +1,17 @@
-import { BlockModel, InferOutputsType, isPColumnSpec, parseResourceMap, PlRef } from '@platforma-sdk/model';
+import { BlockModel, InferOutputsType, isPColumnSpec, 
+  parseResourceMap, PlRef } from '@platforma-sdk/model';
 
-/**
- * Block arguments coming from the user interface
- */
+// Block arguments coming from the user interface
 export type BlockArgs = {
-  /**
-   * Reference to the fastq data
-   */
+  // Reference to the fastq data
   refData?: PlRef;
 
-  name?: string;
-
-  /**
-   * Block title
-   */
+  // Block title
   title?: string;
 
 };
 
-/**
- * UI state
- */
+// UI state
 export type UiState = {
 };
 
@@ -32,10 +23,11 @@ export const model = BlockModel.create()
   .withUiState<UiState>({
   })
 
-   /**
-   * Find possible options for the fastq input
-   */
-   .output("dataOptions", (ctx) => {
+  // Activate "Run" button only after input dataset is selected
+  .argsValid((ctx) =>  ctx.args.refData !== undefined)
+
+  // Find possible options for the fastq input (used in Select dataset button)
+  .output("dataOptions", (ctx) => {
     return ctx.resultPool.getOptions((v) => {
       if (!isPColumnSpec(v)) return false;
       const domain = v.domain;
@@ -44,14 +36,13 @@ export const model = BlockModel.create()
         (v.valueType as string) === "File" &&
         domain !== undefined &&
         (domain["pl7.app/fileExtension"] === "fastq" ||
-          domain["pl7.app/fileExtension"] === "fastq.gz")
+         domain["pl7.app/fileExtension"] === "fastq.gz")
       );
     });
   })
 
-  /**
-   * Returns true if the block is currently in "running" state
-   */
+
+  // Returns true if the block is currently in "running" state
   .output("isRunning", (ctx) => ctx.outputs?.getIsReadyOrError() === false)
 
 
@@ -69,44 +60,45 @@ export const model = BlockModel.create()
     return labels;
     })
 
-    /**
-   * QC progress
-   */
-  // .output("fastqcProgress", (wf) => {
-  //   return parseResourceMap(
-  //     wf.outputs?.resolve("fastqcLog"),
-  //     (acc) => acc.getLogHandle(),
-  //     false
-  //     );
-  //   })
-  
-    /**
-     * Last line from FastQC log output
-     */
-  // .output("fastqcProgressLine", (wf) => {
-  //   return parseResourceMap(
-  //     wf.outputs?.resolve("fastqcLog"),
-  //     (acc) => acc.getLastLogs(1),
-  //     false
-  //   );
-  //   })
+  // FastQC progress form logs
+  .output("fastqcProgress", (wf) => {
+    return parseResourceMap(
+      wf.outputs?.resolve("fastQCstdout"),
+      (acc) => acc.getLogHandle(),
+      false
+      );
+    })
 
+  // Last line (on the go) from FastQC log output
+  .output("fastqcProgressLine", (wf) => {
+    return parseResourceMap(
+      wf.outputs?.resolve("fastQCstdout"),
+      (acc) => acc.getLastLogs(1),
+      false
+    );
+    })
 
-  .output("fastqcZipPf_r1", (wf) => {
-    //return wf.outputs?.resolve("pf")?.resolve("rawCounts.data")?.listInputFields()
-    const pCols = wf.outputs?.resolve("fastqcZipPf_r1")?.getPColumns();
-    if (pCols === undefined) return undefined;
+  // Reference to zip file with html content created by FastQC
+  .output('FastQCzipR1', (wf) => {
+    return parseResourceMap(
+      wf.outputs?.resolve("FastQCzipR1"),
+      (acc) => acc.extractArchiveAndGetURL('zip'),
+      false
+    );
 
-    return pCols;
-  })
+    }
+  )
 
-  .output("fastqcZipPf_r2", (wf) => {
-    //return wf.outputs?.resolve("pf")?.resolve("rawCounts.data")?.listInputFields()
-    const pCols = wf.outputs?.resolve("fastqcZipPf_r2")?.getPColumns();
-    if (pCols === undefined) return undefined;
+  // Reference to zip file with html content created by FastQC
+  .output('FastQCzipR2', (wf) => {
+    return parseResourceMap(
+      wf.outputs?.resolve("FastQCzipR2"),
+      (acc) => acc.extractArchiveAndGetURL('zip'),
+      false
+    );
 
-    return pCols;
-  })
+    }
+  )
 
   .sections([
     { type: 'link', href: '/', label: 'Main' }

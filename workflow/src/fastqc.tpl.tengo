@@ -1,21 +1,19 @@
 self := import("@platforma-sdk/workflow-tengo:tpl")
-
 json := import("json")
-
 ll := import("@platforma-sdk/workflow-tengo:ll")
 exec := import("@platforma-sdk/workflow-tengo:exec")
 file := import("@platforma-sdk/workflow-tengo:file")
-// assets := import("@platforma-sdk/workflow-tengo:assets")
+assets := import("@platforma-sdk/workflow-tengo:assets")
 pframes := import("@platforma-sdk/workflow-tengo:pframes")
 pConstants := import("@platforma-sdk/workflow-tengo:pframes.constants")
 
 
 
-self.defineOutputs("FastQCzip_r1",
-	"FastQChtml_r1",
-    "FastQCzip_r2",
-	"FastQChtml_r2",
-    "fastqcLog")
+self.defineOutputs("FastQCzipR1",
+	"FastQChtmlR1",
+    "FastQCzipR2",
+	"FastQChtmlR2",
+    "fastQCstdout")
 
 
 self.body(func(inputs) {
@@ -24,12 +22,14 @@ self.body(func(inputs) {
 	fileExtension := inputs.fileExtension
 
     fastqcRun := exec.builder().
-                cmd("/Users/julen/Programs/FastQC_v0.12.1/fastqc").
+                software(assets.importSoftware("@platforma-open/milaboratories.software-fastqc:main")).
+                // We havwe to use the commands same way they are named within FastQCs java application
                 // Force output in working folder (default data folder)
-                arg("-o").arg(".").
-                // CPUs per fastq pair (or per fastq if not paired)
-                arg("-t").arg("1")
+                arg("-Dfastqc.output_dir=.").
+                // CPUs per sample
+                arg("-Dfastqc.threads=1")
                 // Input fastq files added below
+                
     
 
 
@@ -74,7 +74,8 @@ self.body(func(inputs) {
 		run()
 	
     // Store standard output for analysis progress bar
-    fastqcLog := fastqcRun.getStdoutStream()
+    fastQCstdout := fastqcRun.getStdoutStream()
+    // fastqcStdout := fastqcRun.getFile("stdout.txt")
     // stderr has the progress percentages until 95%
     /* Started analysis of subsampled20_SRR22319482_1.fastq.gz
        Approx 5% complete for subsampled20_SRR22319482_1.fastq.gz
@@ -89,19 +90,19 @@ self.body(func(inputs) {
     */ 
 
     // get output files
-    FastQCzip_r1 := fastqcRun.getFile("input_R1_fastqc.zip")
-    FastQChtml_r1 := fastqcRun.getFile("input_R1_fastqc.html")
+    FastQCzipR1 := fastqcRun.getFile("input_R1_fastqc.zip")
+    FastQChtmlR1 := fastqcRun.getFile("input_R1_fastqc.html")
 
-    FastQCzip_r2 := fastqcRun.getFile("input_R2_fastqc.zip")
-    FastQChtml_r2 := fastqcRun.getFile("input_R2_fastqc.html")
+    FastQCzipR2 := fastqcRun.getFile("input_R2_fastqc.zip")
+    FastQChtmlR2 := fastqcRun.getFile("input_R2_fastqc.html")
 
     
 	output := {
-		FastQCzip_r1: file.exportFile(FastQCzip_r1),
-		FastQChtml_r1: file.exportFile(FastQChtml_r1),
-        FastQCzip_r2: file.exportFile(FastQCzip_r2),
-		FastQChtml_r2: file.exportFile(FastQChtml_r2),
-        fastqcLog: fastqcLog
+		FastQCzipR1: file.exportFile(FastQCzipR1),
+		FastQChtmlR1: file.exportFile(FastQChtmlR1),
+        FastQCzipR2: file.exportFile(FastQCzipR2),
+		FastQChtmlR2: file.exportFile(FastQChtmlR2),
+        fastQCstdout: fastQCstdout
 	}
 
 	return output

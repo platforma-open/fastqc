@@ -1,4 +1,3 @@
-// "hello world"
 wf := import("@platforma-sdk/workflow-tengo:workflow")
 exec := import("@platforma-sdk/workflow-tengo:exec")
 assets:= import("@platforma-sdk/workflow-tengo:assets")
@@ -26,22 +25,21 @@ wf.body(func(args) {
 	// Fastq or Fastq.gz
 	fileExtension := inputSpec.domain["pl7.app/fileExtension"]
 
-	// Modify this in de future to store reference to FastQC output zip
-	fastQCzip := "Hello from Tengo, " + args.name + "!"
-
-
 	aggregationTargets := [{
 		type: "Resource",
-		name: "FastQCzip_r1"
+		name: "FastQCzipR1"
 	}, {
 		type: "Resource",
-		name: "FastQChtml_r1"
+		name: "FastQChtmlR1"
 	}, {
 		type: "Resource",
-		name: "FastQCzip_r2"
+		name: "FastQCzipR2"
 	}, {
 		type: "Resource",
-		name: "FastQChtml_r2"
+		name: "FastQChtmlR2"
+	},{
+		type: "Resource",
+		name: "fastQCstdout"
 	}]
 
 	fastqcResults := llPFrames.aggregate(
@@ -54,68 +52,41 @@ wf.body(func(args) {
 		}
 	)
 
-	// Create FastQC ZIP output specs
-	fastqcZipPf_r1 := {
-		"fastQC.spec":
-		{
-			kind: "PColumn",
-			name: "zipFile",
-			domain: {
-				"pl7.app/blockId": blockId
-			},
-			valueType: "Double",
-			axesSpec: [
-				inputSpec.axesSpec[0],
-				{
-					"name": "pl7.app/fastQC/zip",
-					"type": "String",
-					"domain": {
-						"pl7.app/blockId": blockId,
-						"pl7.app/species": species
-					},
-					"annotations": {
-						"pl7.app/label": "FastQC"
-					}
-				}
-				],
-			annotations: {"pl7.app/label": "FastQC output Zip file"}
-		},
-		"fastQC.data": fastqcResults.output("FastQCzip_r1")
-	}
-
-	fastqcZipPf_r2 := {
-		"fastQC.spec":
-		{
-			kind: "PColumn",
-			name: "zipFile",
-			domain: {
-				"pl7.app/blockId": blockId
-			},
-			valueType: "Double",
-			axesSpec: [
-				inputSpec.axesSpec[0],
-				{
-					"name": "pl7.app/fastQC/zip",
-					"type": "String",
-					"domain": {
-						"pl7.app/blockId": blockId,
-						"pl7.app/species": species
-					},
-					"annotations": {
-						"pl7.app/label": "FastQC"
-					}
-				}
-				],
-			annotations: {"pl7.app/label": "FastQC output Zip file"}
-		},
-		"fastQC.data": fastqcResults.output("FastQCzip_r2")
-	}
+	// @TODO: use it to allow html download from Platforma
+	// Create FastQC html output specs
+	// FastQChtmlR1Spec := {
+	// 	"fastQC.spec":
+	// 	{
+	// 		kind: "PColumn",
+	// 		name: "html",
+	// 		domain: {
+	// 			"pl7.app/blockId": blockId
+	// 		},
+	// 		valueType: "Double",
+	// 		axesSpec: [
+	// 			inputSpec.axesSpec[0],
+	// 			{
+	// 				"name": "pl7.app/fastQC/html",
+	// 				"type": "String",
+	// 				"domain": {
+	// 					"pl7.app/blockId": blockId,
+	// 					"pl7.app/species": species
+	// 				},
+	// 				"annotations": {
+	// 					"pl7.app/label": "FastQC"
+	// 				}
+	// 			}
+	// 			],
+	// 		annotations: {"pl7.app/label": "FastQC output html file"}
+	// 	},
+	// 	"fastQC.data": fastqcResults.output("FastQChtmlR1")
+	// }
 
 	return {
 		outputs: {
-			// fastqcLog: fastqcResults.output("fastqcLog"),
-			fastqcZipPf_r1: fastqcZipPf_r1,
-			fastqcZipPf_r2: fastqcZipPf_r2
+			fastQCstdout: fastqcResults.output("fastQCstdout"),
+			FastQCzipR1: fastqcResults.output("FastQCzipR1"),
+			FastQCzipR2: fastqcResults.output("FastQCzipR2")
 			
 		},
 

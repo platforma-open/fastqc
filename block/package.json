@@ -25,10 +25,10 @@
       "url": "https://github.com/milaboratory/platforma-FastQC",
       "docs": "https://github.com/milaboratory/platforma-FastQC/docs",
       "support": "mailto:support@milaboratories.com",
-      "description": "Simple Hello World block that can be used as a boilerplate for newly created blocks.",
+      "description": "Fastq files QC analysis with FastQC program. It runs QC and produces a report html per file.",
       "longDescription": "file:../docs/description.md",
       "changelog": "file:../CHANGELOG.md",
-      "tags": ["tutorial"],
+      "tags": ["QC"],
       "organization": {
         "name": "MiLaboratories Inc",
         "url": "https://milaboratories.com/",
@@ -37,7 +37,8 @@
     }
   },
   "devDependencies": {
-    "@platforma-sdk/block-tools": "catalog:"
+    "@platforma-sdk/block-tools": "catalog:",
+    "unzipper": "catalog:"
   },
   "packageManager": "pnpm@9.12.0"
 }
