@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.fastqc.model
 
+## 2.0.1
+
+### Patch Changes
+
+- 6fb960e: Use @platforma-sdk/eslint-config
+
 ## 2.0.0
 
 ### Major Changes
