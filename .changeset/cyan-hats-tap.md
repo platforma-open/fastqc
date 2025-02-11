@@ -1,6 +1,6 @@
 ---
-'@platforma-open/milaboratories.FastQC.model': patch
-'@platforma-open/milaboratories.FastQC.ui': patch
+'@platforma-open/milaboratories.fastqc.model': patch
+'@platforma-open/milaboratories.fastqc.ui': patch
 ---
 
 Use @platforma-sdk/eslint-config

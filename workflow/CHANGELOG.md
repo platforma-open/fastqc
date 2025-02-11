@@ -1,4 +1,4 @@
-# @platforma-open/milaboratories.FastQC.workflow
+# @platforma-open/milaboratories.fastqc.workflow
 
 ## 2.0.0
 

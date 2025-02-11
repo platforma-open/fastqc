@@ -1,4 +1,4 @@
-# @platforma-open/milaboratories.FastQC.model
+# @platforma-open/milaboratories.fastqc.model
 
 ## 2.0.0
 
