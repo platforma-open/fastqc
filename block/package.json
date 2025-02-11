@@ -1,6 +1,6 @@
 {
   "name": "@platforma-open/milaboratories.FastQC",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "scripts": {
     "build": "rm -rf block-pack/* && block-tools pack"
   },
@@ -28,7 +28,9 @@
       "description": "Fastq files QC analysis with FastQC program. It runs QC and produces a report html per file.",
       "longDescription": "file:../docs/description.md",
       "changelog": "file:../CHANGELOG.md",
-      "tags": ["QC"],
+      "tags": [
+        "QC"
+      ],
       "organization": {
         "name": "MiLaboratories Inc",
         "url": "https://milaboratories.com/",
