@@ -9,15 +9,15 @@
     "index.js"
   ],
   "dependencies": {
-    "@platforma-open/milaboratories.FastQC.workflow": "workspace:*",
-    "@platforma-open/milaboratories.FastQC.model": "workspace:*",
-    "@platforma-open/milaboratories.FastQC.ui": "workspace:*"
+    "@platforma-open/milaboratories.fastqc.workflow": "workspace:*",
+    "@platforma-open/milaboratories.fastqc.model": "workspace:*",
+    "@platforma-open/milaboratories.fastqc.ui": "workspace:*"
   },
   "block": {
     "components": {
-      "workflow": "@platforma-open/milaboratories.FastQC.workflow/dist/tengo/tpl/main.plj.gz",
-      "model": "@platforma-open/milaboratories.FastQC.model/dist/model.json",
-      "ui": "@platforma-open/milaboratories.FastQC.ui/dist"
+      "workflow": "@platforma-open/milaboratories.fastqc.workflow/dist/tengo/tpl/main.plj.gz",
+      "model": "@platforma-open/milaboratories.fastqc.model/dist/model.json",
+      "ui": "@platforma-open/milaboratories.fastqc.ui/dist"
     },
     "meta": {
       "title": "FastQC",

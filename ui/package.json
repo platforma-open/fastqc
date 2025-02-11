@@ -10,7 +10,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@platforma-open/milaboratories.FastQC.model": "workspace:*",
+    "@platforma-open/milaboratories.fastqc.model": "workspace:*",
     "@platforma-sdk/ui-vue": "catalog:",
     "ag-grid-enterprise": "catalog:",
     "ag-grid-vue3": "catalog:",

@@ -86,13 +86,13 @@ importers:
 
   block:
     dependencies:
-      '@platforma-open/milaboratories.FastQC.model':
+      '@platforma-open/milaboratories.fastqc.model':
         specifier: workspace:*
         version: link:../model
-      '@platforma-open/milaboratories.FastQC.ui':
+      '@platforma-open/milaboratories.fastqc.ui':
         specifier: workspace:*
         version: link:../ui
-      '@platforma-open/milaboratories.FastQC.workflow':
+      '@platforma-open/milaboratories.fastqc.workflow':
         specifier: workspace:*
         version: link:../workflow
     devDependencies:
@@ -115,6 +115,9 @@ importers:
       '@platforma-sdk/block-tools':
         specifier: 'catalog:'
         version: 2.5.7
+      '@platforma-sdk/eslint-config':
+        specifier: 'catalog:'
+        version: 1.0.1(@eslint/js@9.20.0)(@stylistic/eslint-plugin@2.13.0(eslint@9.20.0)(typescript@5.7.3))(eslint-plugin-n@17.15.1(eslint@9.20.0))(eslint-plugin-vue@9.32.0(eslint@9.20.0))(eslint@9.20.0)(globals@15.14.0)(typescript-eslint@8.23.0(eslint@9.20.0)(typescript@5.7.3))(typescript@5.7.3)
       tsup:
         specifier: 'catalog:'
         version: 8.3.5(postcss@8.4.49)(typescript@5.7.3)(yaml@2.7.0)
@@ -128,7 +131,7 @@ importers:
   test:
     dependencies:
       this-block:
-        specifier: workspace:@platforma-open/milaboratories.FastQC@*
+        specifier: workspace:@platforma-open/milaboratories.fastqc@*
         version: link:../block
     devDependencies:
       '@platforma-sdk/test':
@@ -146,7 +149,7 @@ importers:
       '@milaboratories/graph-maker':
         specifier: 'catalog:'
         version: 1.1.32(d3-dispatch@3.0.1)(d3-path@3.1.0)(d3-scale-chromatic@3.1.0)(typescript@5.7.3)
-      '@platforma-open/milaboratories.FastQC.model':
+      '@platforma-open/milaboratories.fastqc.model':
         specifier: workspace:*
         version: link:../model
       '@platforma-sdk/model':
