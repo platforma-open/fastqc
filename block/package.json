@@ -1,5 +1,5 @@
 {
-  "name": "@platforma-open/milaboratories.FastQC",
+  "name": "@platforma-open/milaboratories.fastqc",
   "version": "2.0.0",
   "scripts": {
     "build": "rm -rf block-pack/* && block-tools pack"
@@ -22,8 +22,8 @@
     "meta": {
       "title": "FastQC",
       "logo": "file:../logos/block-logo.png",
-      "url": "https://github.com/milaboratory/platforma-FastQC",
-      "docs": "https://github.com/milaboratory/platforma-FastQC/docs",
+      "url": "https://github.com/milaboratory/platforma-fastqc",
+      "docs": "https://github.com/milaboratory/platforma-fastqc/docs",
       "support": "mailto:support@milaboratories.com",
       "description": "Fastq files QC analysis with FastQC program. It runs QC and produces a report html per file.",
       "longDescription": "file:../docs/description.md",

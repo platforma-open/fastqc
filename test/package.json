@@ -1,5 +1,5 @@
 {
-  "name": "@platforma-open/milaboratories.FastQC.test",
+  "name": "@platforma-open/milaboratories.fastqc.test",
   "private": true,
   "version": "1.0.0",
   "description": "Block tests",
@@ -10,7 +10,7 @@
   "files": [],
   "keywords": [],
   "dependencies": {
-    "this-block": "workspace:@platforma-open/milaboratories.FastQC@*"
+    "this-block": "workspace:@platforma-open/milaboratories.fastqc@*"
   },
   "devDependencies": {
     "@platforma-sdk/test": "catalog:",
