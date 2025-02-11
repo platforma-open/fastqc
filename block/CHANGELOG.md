@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.fastqc
 
+## 2.0.2
+
+### Patch Changes
+
+- e5a14e3: chore: fix publishing
+
 ## 2.0.1
 
 ### Patch Changes
