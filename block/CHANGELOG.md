@@ -1,5 +1,18 @@
 # @platforma-open/milaboratories.fastqc
 
+## 2.1.0
+
+### Minor Changes
+
+- 4de82cd: Update to new version and fix deduplication issue
+
+### Patch Changes
+
+- Updated dependencies [4de82cd]
+  - @platforma-open/milaboratories.fastqc.workflow@2.1.0
+  - @platforma-open/milaboratories.fastqc.model@2.1.0
+  - @platforma-open/milaboratories.fastqc.ui@2.1.0
+
 ## 2.0.2
 
 ### Patch Changes

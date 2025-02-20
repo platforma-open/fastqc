@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.fastqc.model
 
+## 2.1.0
+
+### Minor Changes
+
+- 4de82cd: Update to new version and fix deduplication issue
+
 ## 2.0.1
 
 ### Patch Changes
