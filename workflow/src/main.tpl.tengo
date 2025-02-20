@@ -16,7 +16,6 @@ wf.prepare(func(args){
 })
 
 wf.body(func(args) {
-	blockId := wf.blockId().getDataAsJson()
 	input := args.resolvedFastq
 	inputSpec := input.spec
 	species := args.species
@@ -47,7 +46,6 @@ wf.body(func(args) {
 		aggregationTargets,
 		false,
 		{
-			blockId: blockId,
 			fileExtension: fileExtension
 		}
 	)

@@ -74,7 +74,9 @@ export const model = BlockModel.create()
   .output('fastqcProgressLine', (wf) => {
     return parseResourceMap(
       wf.outputs?.resolve('fastQCstdout'),
-      (acc) => acc.getLastLogs(1),
+      // Return last line that contains string in ()
+      // Also returns if process is done or not
+      (acc) => acc.getProgressLogWithInfo(''),
       false,
     );
   })

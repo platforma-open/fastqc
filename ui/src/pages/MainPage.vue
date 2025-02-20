@@ -2,11 +2,11 @@
 import { AgGridVue } from 'ag-grid-vue3';
 import { useApp } from '../app';
 import { computed, reactive, shallowRef } from 'vue';
-import type { PlRef } from '@platforma-sdk/model';
+import type { PlRef, ProgressLogWithInfo } from '@platforma-sdk/model';
 import { plRefsEqual } from '@platforma-sdk/model';
 import { AgGridTheme, PlAgCellProgress, PlAgOverlayLoading, PlAgOverlayNoRows,
   PlAgTextAndButtonCell, PlBlockPage, PlBtnGhost, PlDropdownRef,
-  PlMaskIcon24, PlSlideModal } from '@platforma-sdk/ui-vue';
+  PlMaskIcon24, PlSlideModal, createAgGridColDef} from '@platforma-sdk/ui-vue';
 import type { ColDef, GridApi, GridOptions, GridReadyEvent } from 'ag-grid-enterprise';
 import { resultMap } from './results';
 import ReportPanel from './ReportPanel.vue';
@@ -31,7 +31,7 @@ const onGridReady = (params: GridReadyEvent) => {
 type FastQCOverviewRow = {
   sampleId: string;
   sampleLabel: string;
-  progress?: string;
+  progress?: ProgressLogWithInfo;
 };
 /** Rows for ag-table */
 const results = computed<FastQCOverviewRow[] | undefined>(() => {
@@ -63,51 +63,48 @@ const columnDefs: ColDef[] = [
       invokeRowsOnDoubleClick: true,
     },
   },
-  {
+  createAgGridColDef({
     colId: 'fastqc',
-    cellRendererSelector: (cellData) => {
-      if (cellData.data?.progress === undefined)
+    headerName: 'FastQC Progress',
+    progress: (cellData) => {
+      const progress: ProgressLogWithInfo | undefined = cellData.data?.progress;
+      console.log(progress);
+      if (progress === undefined)
         return {
-          component: PlAgCellProgress,
-          params: {
-            progress: 0,
-            step: 'Queued',
-            stage: 'not_started',
-          },
+          status: 'not_started',
         };
 
-      const progressStr = cellData.data.progress;
-      console.log(progressStr);
-      let progress: number;
-
-      if (progressStr.startsWith('Analysis complete'))
-        progress = 100;
-      else {
-        const match = progressStr.match(ProgressPattern);
-        if (match)
-          progress = Number(match[1]);
-        else
-          progress = 0;
+      // @TODO Fix bug with live (not being set to false) and remove 'Analysis complete' section
+      if (!progress.live) {
+        return {
+          status: 'done',
+        };
+      }
+      if (progress.progressLine?.startsWith('Analysis complete')) {
+        return {
+          status: 'done',
+        };
       }
 
-      console.log(progress);
+      if (!progress.progressLine)
+        return {
+          status: 'running',
+        };
+
+      let percent = 0;
+      const match = progress.progressLine.match(ProgressPattern);
+      if (match)
+        percent = Number(match[1]);
+
+      console.log(percent);
 
       return {
-        component: PlAgCellProgress,
-        params: {
-          progress,
-          progressString: `${progress}%`,
-          step: 'Analysis',
-          stage: 'running',
-        },
+        percent: percent,
+        text: 'Analysis',
+        status: 'running',
       };
     },
-    headerName: 'FastQC Progress',
-    cellStyle: {
-      '--ag-cell-horizontal-padding': '0px',
-      '--ag-cell-vertical-padding': '0px',
-    },
-  },
+  }),
 ];
 
 const gridOptions: GridOptions = {

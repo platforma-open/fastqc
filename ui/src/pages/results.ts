@@ -1,11 +1,11 @@
-import type { AnyLogHandle } from '@platforma-sdk/model';
+import type { AnyLogHandle, ProgressLogWithInfo } from '@platforma-sdk/model';
 import { computed } from 'vue';
 import { useApp } from '../app';
 
 export type ResultEntry = {
   sampleLabel: string;
   fastqcProgress?: AnyLogHandle;
-  fastqcProgressLine?: string;
+  fastqcProgressLine?: ProgressLogWithInfo;
 };
 
 // return a map of sampleId => ResultEntry
