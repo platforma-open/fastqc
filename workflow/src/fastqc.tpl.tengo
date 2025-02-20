@@ -18,7 +18,6 @@ self.defineOutputs("FastQCzipR1",
 
 self.body(func(inputs) {
 	inputData := inputs[pConstants.VALUE_FIELD_NAME]
-	blockId := inputs.blockId
 	fileExtension := inputs.fileExtension
 
     fastqcRun := exec.builder().
