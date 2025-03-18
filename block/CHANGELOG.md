@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.fastqc
 
+## 2.1.1
+
+### Patch Changes
+
+- cd59916: Updated tags and ranking
+
 ## 2.1.0
 
 ### Minor Changes
