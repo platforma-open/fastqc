@@ -32,13 +32,15 @@
       "longDescription": "file:../docs/description.md",
       "changelog": "file:../CHANGELOG.md",
       "tags": [
-        "QC"
+        "Upstream",
+        "FASTQ"
       ],
       "organization": {
         "name": "MiLaboratories Inc",
         "url": "https://milaboratories.com/",
         "logo": "file:../logos/milaboratories.png"
-      }
+      },
+      "marketplaceRanking": 17900
     }
   },
   "devDependencies": {
