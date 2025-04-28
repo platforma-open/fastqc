@@ -21,7 +21,7 @@ self.body(func(inputs) {
 	fileExtension := inputs.fileExtension
 
     fastqcRun := exec.builder().
-                software(assets.importSoftware("@platforma-open/milaboratories.software-fastqc:main")).
+                software(assets.importSoftware("@platforma-open/babraham.software-fastqc:main")).
                 // We havwe to use the commands same way they are named within FastQCs java application
                 // Force output in working folder (default data folder)
                 arg("-Dfastqc.output_dir=.").

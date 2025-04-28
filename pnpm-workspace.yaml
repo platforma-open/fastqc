@@ -12,11 +12,11 @@ catalog:
   "@platforma-sdk/block-tools": ^2.5.7
   "@platforma-sdk/test": ^1.22.5
   "@platforma-sdk/tengo-builder": ^1.17.5
-  "@platforma-sdk/package-builder": ^2.15.0
+  "@platforma-sdk/package-builder": ^2.15.6
   "@platforma-sdk/eslint-config": ^1.0.1
 
   "@platforma-open/milaboratories.software-small-binaries": ^1.15.6
-  "@platforma-open/milaboratories.software-fastqc": ^1.0.7
+  "@platforma-open/babraham.software-fastqc": ^1.0.8
 
 
   "@milaboratories/graph-maker": ^1.1.32
@@ -31,11 +31,11 @@ catalog:
   
   "typescript": ^5.7.2
   "tsup": ~8.3.5
-  "turbo": ^2.3.3
+  "turbo": ^2.5.2
 
   "vite": ^6.0.7
   "vitest": ^2.1.8
   "@vitejs/plugin-vue": ^5.2.1
 
   "unzipper": "^0.12.3"
-  "@changesets/cli": ^2.27.11
+  "@changesets/cli": ^2.29.2
