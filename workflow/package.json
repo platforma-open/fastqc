@@ -15,6 +15,6 @@
     "@platforma-sdk/test": "catalog:",
     "vitest": "catalog:",
     "@platforma-open/milaboratories.software-small-binaries": "catalog:",
-    "@platforma-open/milaboratories.software-fastqc": "catalog:"
+    "@platforma-open/babraham.software-fastqc": "catalog:"
   }
 }
