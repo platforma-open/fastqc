@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.fastqc.workflow
 
+## 2.1.1
+
+### Patch Changes
+
+- 24f0bc8: chore: update deps
+
 ## 2.1.0
 
 ### Minor Changes
