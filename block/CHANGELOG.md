@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.fastqc
 
+## 2.1.3
+
+### Patch Changes
+
+- c03cbf9: chore: update deps
+
 ## 2.1.2
 
 ### Patch Changes
