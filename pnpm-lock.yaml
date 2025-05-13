@@ -13,8 +13,8 @@ catalogs:
       specifier: ^1.1.32
       version: 1.1.32
     '@platforma-open/babraham.software-fastqc':
-      specifier: ^1.0.8
-      version: 1.0.8
+      specifier: ^1.0.9
+      version: 1.0.9
     '@platforma-open/milaboratories.software-small-binaries':
       specifier: ^1.15.6
       version: 1.15.6
@@ -188,7 +188,7 @@ importers:
     devDependencies:
       '@platforma-open/babraham.software-fastqc':
         specifier: 'catalog:'
-        version: 1.0.8
+        version: 1.0.9
       '@platforma-open/milaboratories.software-small-binaries':
         specifier: 'catalog:'
         version: 1.15.6
@@ -1153,8 +1153,8 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@platforma-open/babraham.software-fastqc@1.0.8':
-    resolution: {integrity: sha512-EzNOVqcG6xIuz0/vzJA9VLlXHIFVobcETm56p14gq9FI4fuYCjvKD0lA0WqjQea3cdLb0UXdIqJxvmy7hEz56A==}
+  '@platforma-open/babraham.software-fastqc@1.0.9':
+    resolution: {integrity: sha512-ysnzuZYsKx7oNb7RLYv+yeVNGqfCb9CbzMrK82hQYmMBV+QrGzLaczCXOI8zlvuOhdSu32OV71A2P03S0OVZGw==}
 
   '@platforma-open/milaboratories.software-small-binaries.guided-command@1.0.4':
     resolution: {integrity: sha512-LD8XQDnR+L9oRD7JXE0VWGmv1/0cm+J71flrwBUWeIbuaenPC8Nsza8oy7JjLJ8AX+bm8XAyyJALuqBBqkL95Q==}
@@ -6605,7 +6605,7 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@platforma-open/babraham.software-fastqc@1.0.8': {}
+  '@platforma-open/babraham.software-fastqc@1.0.9': {}
 
   '@platforma-open/milaboratories.software-small-binaries.guided-command@1.0.4': {}
 
