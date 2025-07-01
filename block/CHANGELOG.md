@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.fastqc
 
+## 2.2.0
+
+### Minor Changes
+
+- 8451199: allow prepare venv on Windows
+
 ## 2.1.3
 
 ### Patch Changes
