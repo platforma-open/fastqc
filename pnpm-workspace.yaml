@@ -21,7 +21,7 @@ catalog:
 
   "@milaboratories/graph-maker": ^1.1.32
 
-  "@platforma-open/milaboratories.runenv-python-3": ^1.0.0
+  "@platforma-open/milaboratories.runenv-python-3": ^1.1.16
   
   'ag-grid-enterprise': &ag-grid ^33.0.4
   'ag-grid-vue3': *ag-grid
