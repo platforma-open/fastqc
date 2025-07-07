@@ -88,22 +88,22 @@ self.body(func(inputs) {
       Analysis complete for subsampled20_SRR22319482_1.fastq.gz   
     */ 
 
-    // get output files
-    FastQCzipR1 := fastqcRun.getFile("input_R1_fastqc.zip")
-    FastQChtmlR1 := fastqcRun.getFile("input_R1_fastqc.html")
-
-    FastQCzipR2 := fastqcRun.getFile("input_R2_fastqc.zip")
-    FastQChtmlR2 := fastqcRun.getFile("input_R2_fastqc.html")
-
-    
 	output := {
-		FastQCzipR1: file.exportFile(FastQCzipR1),
-		FastQChtmlR1: file.exportFile(FastQChtmlR1),
-        FastQCzipR2: file.exportFile(FastQCzipR2),
-		FastQChtmlR2: file.exportFile(FastQChtmlR2),
         fastQCstdout: fastQCstdout
 	}
 
+    // get output files for the read indexes we have
+    for rIndex in ["R1", "R2"] {
+		inputFile := filesByRIndex[rIndex]
+        // single end case, return empty outputs
+		if is_undefined(inputFile) {
+			output["FastQCzip" + rIndex] = {}
+            output["FastQChtml" + rIndex] = {}
+            continue
+		}
+        output["FastQCzip" + rIndex] = file.exportFile(fastqcRun.getFile("input_" + rIndex + "_fastqc.zip"))
+        output["FastQChtml" + rIndex] = file.exportFile(fastqcRun.getFile("input_" + rIndex + "_fastqc.html"))
+    }
 	return output
 
 })
