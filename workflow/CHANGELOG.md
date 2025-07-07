@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.fastqc.workflow
 
+## 2.2.0
+
+### Minor Changes
+
+- c6919da: Do not throw error when fastq files are single-end
+
 ## 2.1.1
 
 ### Patch Changes

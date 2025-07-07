@@ -1,5 +1,12 @@
 # @platforma-open/milaboratories.fastqc
 
+## 2.2.1
+
+### Patch Changes
+
+- Updated dependencies [c6919da]
+  - @platforma-open/milaboratories.fastqc.workflow@2.2.0
+
 ## 2.2.0
 
 ### Minor Changes
