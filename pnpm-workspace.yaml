@@ -16,7 +16,7 @@ catalog:
   "@platforma-sdk/eslint-config": ^1.0.1
 
   "@platforma-open/milaboratories.software-small-binaries": ^1.15.6
-  "@platforma-open/babraham.software-fastqc": ^1.0.9
+  "@platforma-open/babraham.software-fastqc": ^1.0.10
 
 
   "@milaboratories/graph-maker": ^1.1.32
