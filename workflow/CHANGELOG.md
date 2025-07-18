@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.fastqc.workflow
 
+## 2.3.0
+
+### Minor Changes
+
+- b0a1432: add windows support
+
 ## 2.2.0
 
 ### Minor Changes
