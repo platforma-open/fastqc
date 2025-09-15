@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { AgGridVue } from 'ag-grid-vue3';
-import { useApp } from '../app';
-import { computed, reactive, shallowRef } from 'vue';
 import type { PlRef, ProgressLogWithInfo } from '@platforma-sdk/model';
 import { plRefsEqual } from '@platforma-sdk/model';
-import { AgGridTheme, PlAgCellProgress, PlAgOverlayLoading, PlAgOverlayNoRows,
+import {
+  AgGridTheme,
+  PlAgOverlayLoading, PlAgOverlayNoRows,
   PlAgTextAndButtonCell, PlBlockPage, PlBtnGhost, PlDropdownRef,
-  PlMaskIcon24, PlSlideModal, createAgGridColDef} from '@platforma-sdk/ui-vue';
+  PlMaskIcon24, PlSlideModal, createAgGridColDef,
+} from '@platforma-sdk/ui-vue';
 import type { ColDef, GridApi, GridOptions, GridReadyEvent } from 'ag-grid-enterprise';
-import { resultMap } from './results';
+import { AgGridVue } from 'ag-grid-vue3';
+import { computed, reactive, shallowRef } from 'vue';
+import { useApp } from '../app';
 import ReportPanel from './ReportPanel.vue';
+import { resultMap } from './results';
 
 const app = useApp();
 
