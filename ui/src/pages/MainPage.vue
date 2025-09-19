@@ -7,6 +7,7 @@ import {
   PlAgTextAndButtonCell, PlBlockPage, PlBtnGhost, PlDropdownRef,
   PlMaskIcon24, PlSlideModal, createAgGridColDef,
 } from '@platforma-sdk/ui-vue';
+import { refDebounced } from '@vueuse/core';
 import type { ColDef, GridApi, GridOptions, GridReadyEvent } from 'ag-grid-enterprise';
 import { AgGridVue } from 'ag-grid-vue3';
 import { computed, reactive, shallowRef } from 'vue';
@@ -37,7 +38,7 @@ type FastQCOverviewRow = {
   progress?: ProgressLogWithInfo;
 };
 /** Rows for ag-table */
-const results = computed<FastQCOverviewRow[] | undefined>(() => {
+const resultsComputed = computed<FastQCOverviewRow[] | undefined>(() => {
   if (resultMap.value === undefined) return undefined;
   const rows: FastQCOverviewRow[] = [];
   for (const id in resultMap.value) {
@@ -50,6 +51,8 @@ const results = computed<FastQCOverviewRow[] | undefined>(() => {
 
   return rows;
 });
+
+const results = refDebounced(resultsComputed, 100);
 
 const ProgressPattern = /Approx ([0-9]+)%/;
 // How to display content in table
@@ -68,21 +71,14 @@ const columnDefs: ColDef[] = [
   },
   createAgGridColDef({
     colId: 'fastqc',
+    field: 'progress',
     headerName: 'FastQC Progress',
-    progress: (cellData) => {
-      const progress: ProgressLogWithInfo | undefined = cellData.data?.progress;
-      console.log(progress);
+    progress: (progress) => {
       if (progress === undefined)
         return {
           status: 'not_started',
         };
 
-      // @TODO Fix bug with live (not being set to false) and remove 'Analysis complete' section
-      if (!progress.live) {
-        return {
-          status: 'done',
-        };
-      }
       if (progress.progressLine?.startsWith('Analysis complete')) {
         return {
           status: 'done',
@@ -98,8 +94,6 @@ const columnDefs: ColDef[] = [
       const match = progress.progressLine.match(ProgressPattern);
       if (match)
         percent = Number(match[1]);
-
-      console.log(percent);
 
       return {
         percent: percent,
