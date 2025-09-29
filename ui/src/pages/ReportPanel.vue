@@ -27,7 +27,7 @@ const reportSrcR1 = computed(() => {
     return undefined;
   }
   return app.model.outputs.FastQCzipR1?.data.find((it) => {
-    return it.key.includes(id);
+    return it.key[0] === id;
   })?.value;
 });
 
@@ -39,7 +39,7 @@ const reportSrcR2 = computed(() => {
     return undefined;
   }
   return app.model.outputs.FastQCzipR2?.data.find((it) => {
-    return it.key.includes(id);
+    return it.key[0] === id;
   })?.value;
 });
 

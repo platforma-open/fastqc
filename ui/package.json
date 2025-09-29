@@ -16,6 +16,7 @@
     "ag-grid-vue3": "catalog:",
     "@milaboratories/graph-maker": "catalog:",
     "vue": "catalog:",
+    "@vueuse/core": "catalog:",
     "@platforma-sdk/model": "catalog:"
   },
   "devDependencies": {
