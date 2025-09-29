@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.fastqc.workflow
 
+## 2.3.1
+
+### Patch Changes
+
+- 2edd4bb: Update SDK
+
 ## 2.3.0
 
 ### Minor Changes
