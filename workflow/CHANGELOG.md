@@ -1,5 +1,14 @@
 # @platforma-open/milaboratories.fastqc.workflow
 
+## 2.3.2
+
+### Patch Changes
+
+- 225371e: technical release
+- 4e99f54: technical release
+- 818f44b: technical release
+- 2f93384: technical release
+
 ## 2.3.1
 
 ### Patch Changes

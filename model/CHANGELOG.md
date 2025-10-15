@@ -1,5 +1,14 @@
 # @platforma-open/milaboratories.fastqc.model
 
+## 2.1.1
+
+### Patch Changes
+
+- 225371e: technical release
+- 4e99f54: technical release
+- 818f44b: technical release
+- 2f93384: technical release
+
 ## 2.1.0
 
 ### Minor Changes

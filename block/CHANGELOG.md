@@ -1,5 +1,21 @@
 # @platforma-open/milaboratories.fastqc
 
+## 2.2.4
+
+### Patch Changes
+
+- 225371e: technical release
+- 4e99f54: technical release
+- 818f44b: technical release
+- 2f93384: technical release
+- Updated dependencies [225371e]
+- Updated dependencies [4e99f54]
+- Updated dependencies [818f44b]
+- Updated dependencies [2f93384]
+  - @platforma-open/milaboratories.fastqc.model@2.1.1
+  - @platforma-open/milaboratories.fastqc.ui@2.1.2
+  - @platforma-open/milaboratories.fastqc.workflow@2.3.2
+
 ## 2.2.3
 
 ### Patch Changes
