@@ -25,10 +25,9 @@
     "meta": {
       "title": "FastQC",
       "logo": "file:../logos/block-logo.png",
-      "url": "https://github.com/milaboratory/platforma-fastqc",
-      "docs": "https://github.com/milaboratory/platforma-fastqc/docs",
+      "url": "https://github.com/platforma-open/fastqc",
       "support": "mailto:support@milaboratories.com",
-      "description": "Fastq files QC analysis with FastQC program. It runs QC and produces a report html per file.",
+      "description": "Performs quality control analysis on FASTQ sequencing files using FastQC, generating comprehensive QC reports with metrics on sequence quality, base composition, adapter content, and duplication levels.",
       "longDescription": "file:../docs/description.md",
       "changelog": "file:../CHANGELOG.md",
       "tags": [
