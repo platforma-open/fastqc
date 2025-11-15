@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.fastqc
 
+## 2.2.5
+
+### Patch Changes
+
+- 100e9ed: Block metadata updated
+
 ## 2.2.4
 
 ### Patch Changes
