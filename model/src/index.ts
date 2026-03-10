@@ -85,7 +85,11 @@ export const model = BlockModel.create()
   .output('FastQCzipR1', (wf) => {
     return parseResourceMap(
       wf.outputs?.resolve('FastQCzipR1'),
-      (acc) => acc.extractArchiveAndGetURL('zip'),
+      (acc) => {
+        // Skip non-blob resources (e.g. empty json/object from single-end data with no R2)
+        if (acc.resourceType.name === 'json/object') return undefined;
+        return acc.extractArchiveAndGetURL('zip');
+      },
       false,
     );
   },
@@ -95,7 +99,11 @@ export const model = BlockModel.create()
   .output('FastQCzipR2', (wf) => {
     return parseResourceMap(
       wf.outputs?.resolve('FastQCzipR2'),
-      (acc) => acc.extractArchiveAndGetURL('zip'),
+      (acc) => {
+        // Skip non-blob resources (e.g. empty json/object from single-end data with no R2)
+        if (acc.resourceType.name === 'json/object') return undefined;
+        return acc.extractArchiveAndGetURL('zip');
+      },
       false,
     );
   },
