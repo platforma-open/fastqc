@@ -1,9 +1,15 @@
-import type { InferOutputsType, PlRef } from '@platforma-sdk/model';
+import type { InferOutputsType, PlRef, TreeNodeAccessor } from '@platforma-sdk/model';
 import {
   BlockModel,
   isPColumnSpec,
   parseResourceMap,
 } from '@platforma-sdk/model';
+
+/** Extract zip archive URL, skipping non-blob resources (e.g. empty json/object from single-end data with no R2) */
+const extractZipURL = (acc: TreeNodeAccessor) => {
+  if (acc.resourceType.name === 'json/object') return undefined;
+  return acc.extractArchiveAndGetURL('zip');
+};
 
 // Block arguments coming from the user interface
 export type BlockArgs = {
@@ -85,29 +91,19 @@ export const model = BlockModel.create()
   .output('FastQCzipR1', (wf) => {
     return parseResourceMap(
       wf.outputs?.resolve('FastQCzipR1'),
-      (acc) => {
-        // Skip non-blob resources (e.g. empty json/object from single-end data with no R2)
-        if (acc.resourceType.name === 'json/object') return undefined;
-        return acc.extractArchiveAndGetURL('zip');
-      },
+      extractZipURL,
       false,
     );
-  },
-  )
+  })
 
   // Reference to zip file with html content created by FastQC
   .output('FastQCzipR2', (wf) => {
     return parseResourceMap(
       wf.outputs?.resolve('FastQCzipR2'),
-      (acc) => {
-        // Skip non-blob resources (e.g. empty json/object from single-end data with no R2)
-        if (acc.resourceType.name === 'json/object') return undefined;
-        return acc.extractArchiveAndGetURL('zip');
-      },
+      extractZipURL,
       false,
     );
-  },
-  )
+  })
 
   .sections([
     { type: 'link', href: '/', label: 'Main' },
