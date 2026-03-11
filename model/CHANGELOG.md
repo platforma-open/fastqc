@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.fastqc.model
 
+## 2.2.0
+
+### Minor Changes
+
+- f99078e: Skip json/object resources before calling extractArchiveAndGetURL('zip') in FastQCzipR1 and FastQCzipR2 outputs
+
 ## 2.1.1
 
 ### Patch Changes

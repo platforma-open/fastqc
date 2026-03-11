@@ -1,5 +1,12 @@
 # @platforma-open/milaboratories.fastqc.ui
 
+## 2.1.3
+
+### Patch Changes
+
+- Updated dependencies [f99078e]
+  - @platforma-open/milaboratories.fastqc.model@2.2.0
+
 ## 2.1.2
 
 ### Patch Changes
