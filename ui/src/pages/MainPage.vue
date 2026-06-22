@@ -127,12 +127,10 @@ const defaultColDef: ColDef = {
 };
 
 function setInput(inputRef?: PlRef) {
-  app.model.data.refData = inputRef;
-  if (inputRef)
-    app.model.data.title = app.model.outputs.dataOptions?.find((o) =>
-      plRefsEqual(o.ref, inputRef),
-    )?.label;
-  else app.model.data.title = undefined;
+  // refData is written by the dropdown's v-model; here we only sync the title.
+  app.model.data.title = inputRef
+    ? app.model.outputs.dataOptions?.find((o) => plRefsEqual(o.ref, inputRef))?.label
+    : undefined;
 }
 </script>
 

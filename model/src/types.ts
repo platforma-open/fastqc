@@ -14,7 +14,7 @@ export type BlockData = {
  * not projected — only `refData` reaches the workflow.
  */
 export type BlockArgs = {
-  refData?: PlRef;
+  refData: PlRef;
 };
 
 /** Legacy V1 on-disk shapes, consumed once by `.upgradeLegacy`. */
