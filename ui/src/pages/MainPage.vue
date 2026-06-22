@@ -28,7 +28,7 @@ const data = reactive<{
   fastqcReportOpen: boolean;
   selectedSample: string | undefined;
 }>({
-  settingsOpen: app.model.args.refData === undefined,
+  settingsOpen: app.model.data.refData === undefined,
   fastqcReportOpen: false,
   selectedSample: undefined,
 });
@@ -127,12 +127,12 @@ const defaultColDef: ColDef = {
 };
 
 function setInput(inputRef?: PlRef) {
-  app.model.args.refData = inputRef;
+  app.model.data.refData = inputRef;
   if (inputRef)
-    app.model.args.title = app.model.outputs.dataOptions?.find((o) =>
+    app.model.data.title = app.model.outputs.dataOptions?.find((o) =>
       plRefsEqual(o.ref, inputRef),
     )?.label;
-  else app.model.args.title = undefined;
+  else app.model.data.title = undefined;
 }
 </script>
 
@@ -168,7 +168,7 @@ function setInput(inputRef?: PlRef) {
   <PlSlideModal v-model="data.settingsOpen">
     <template #title>Settings</template>
     <PlDropdownRef
-      v-model="app.model.args.refData"
+      v-model="app.model.data.refData"
       :options="app.model.outputs.dataOptions"
       label="Select dataset"
       clearable
