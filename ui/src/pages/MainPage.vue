@@ -1,19 +1,25 @@
 <script setup lang="ts">
-import type { PlRef, ProgressLogWithInfo } from '@platforma-sdk/model';
-import { plRefsEqual } from '@platforma-sdk/model';
+import type { PlRef, ProgressLogWithInfo } from "@platforma-sdk/model";
+import { plRefsEqual } from "@platforma-sdk/model";
 import {
   AgGridTheme,
-  PlAgOverlayLoading, PlAgOverlayNoRows,
-  PlAgTextAndButtonCell, PlBlockPage, PlBtnGhost, PlDropdownRef,
-  PlMaskIcon24, PlSlideModal, createAgGridColDef,
-} from '@platforma-sdk/ui-vue';
-import { refDebounced } from '@vueuse/core';
-import type { ColDef, GridApi, GridOptions, GridReadyEvent } from 'ag-grid-enterprise';
-import { AgGridVue } from 'ag-grid-vue3';
-import { computed, reactive, shallowRef } from 'vue';
-import { useApp } from '../app';
-import ReportPanel from './ReportPanel.vue';
-import { resultMap } from './results';
+  PlAgOverlayLoading,
+  PlAgOverlayNoRows,
+  PlAgTextAndButtonCell,
+  PlBlockPage,
+  PlBtnGhost,
+  PlDropdownRef,
+  PlMaskIcon24,
+  PlSlideModal,
+  createAgGridColDef,
+} from "@platforma-sdk/ui-vue";
+import { refDebounced } from "@vueuse/core";
+import type { ColDef, GridApi, GridOptions, GridReadyEvent } from "ag-grid-enterprise";
+import { AgGridVue } from "ag-grid-vue3";
+import { computed, reactive, shallowRef } from "vue";
+import { useApp } from "../app";
+import ReportPanel from "./ReportPanel.vue";
+import { resultMap } from "./results";
 
 const app = useApp();
 
@@ -58,10 +64,10 @@ const ProgressPattern = /Approx ([0-9]+)%/;
 // How to display content in table
 const columnDefs: ColDef[] = [
   {
-    colId: 'label',
-    field: 'sampleLabel',
-    headerName: 'Sample',
-    pinned: 'left',
+    colId: "label",
+    field: "sampleLabel",
+    headerName: "Sample",
+    pinned: "left",
     lockPinned: true,
     sortable: true,
     cellRenderer: PlAgTextAndButtonCell,
@@ -70,35 +76,34 @@ const columnDefs: ColDef[] = [
     },
   },
   createAgGridColDef({
-    colId: 'fastqc',
-    field: 'progress',
-    headerName: 'FastQC Progress',
+    colId: "fastqc",
+    field: "progress",
+    headerName: "FastQC Progress",
     progress: (progress) => {
       if (progress === undefined)
         return {
-          status: 'not_started',
+          status: "not_started",
         };
 
-      if (progress.progressLine?.startsWith('Analysis complete')) {
+      if (progress.progressLine?.startsWith("Analysis complete")) {
         return {
-          status: 'done',
+          status: "done",
         };
       }
 
       if (!progress.progressLine)
         return {
-          status: 'running',
+          status: "running",
         };
 
       let percent = 0;
       const match = progress.progressLine.match(ProgressPattern);
-      if (match)
-        percent = Number(match[1]);
+      if (match) percent = Number(match[1]);
 
       return {
         percent: percent,
-        text: 'Analysis',
-        status: 'running',
+        text: "Analysis",
+        status: "running",
       };
     },
   }),
@@ -124,11 +129,11 @@ const defaultColDef: ColDef = {
 function setInput(inputRef?: PlRef) {
   app.model.args.refData = inputRef;
   if (inputRef)
-    app.model.args.title = app.model.outputs.dataOptions?.find((o) => plRefsEqual(o.ref, inputRef))?.label;
-  else
-    app.model.args.title = undefined;
+    app.model.args.title = app.model.outputs.dataOptions?.find((o) =>
+      plRefsEqual(o.ref, inputRef),
+    )?.label;
+  else app.model.args.title = undefined;
 }
-
 </script>
 
 <template>
@@ -136,7 +141,7 @@ function setInput(inputRef?: PlRef) {
     <!-- Include setting button to open Dataset sliding window -->
     <template #title>FastQC analysis</template>
     <template #append>
-      <PlBtnGhost @click.stop="() => data.settingsOpen = true">
+      <PlBtnGhost @click.stop="() => (data.settingsOpen = true)">
         Settings
         <template #append>
           <PlMaskIcon24 name="settings" />
@@ -146,12 +151,15 @@ function setInput(inputRef?: PlRef) {
 
     <!-- Table showing analysis stage of files from selected dataset -->
     <AgGridVue
-      :theme="AgGridTheme" :style="{ height: '100%' }"
+      :theme="AgGridTheme"
+      :style="{ height: '100%' }"
       :rowData="results"
       :columnDefs="columnDefs"
       :grid-options="gridOptions"
-      :loadingOverlayComponentParams="{ notReady: true }" :defaultColDef="defaultColDef"
-      :loadingOverlayComponent="PlAgOverlayLoading" :noRowsOverlayComponent="PlAgOverlayNoRows"
+      :loadingOverlayComponentParams="{ notReady: true }"
+      :defaultColDef="defaultColDef"
+      :loadingOverlayComponent="PlAgOverlayLoading"
+      :noRowsOverlayComponent="PlAgOverlayNoRows"
       @grid-ready="onGridReady"
     />
   </PlBlockPage>
@@ -160,17 +168,21 @@ function setInput(inputRef?: PlRef) {
   <PlSlideModal v-model="data.settingsOpen">
     <template #title>Settings</template>
     <PlDropdownRef
-      v-model="app.model.args.refData" :options="app.model.outputs.dataOptions"
+      v-model="app.model.args.refData"
+      :options="app.model.outputs.dataOptions"
       label="Select dataset"
-      clearable @update:model-value="setInput"
+      clearable
+      @update:model-value="setInput"
     />
   </PlSlideModal>
 
   <!-- Slide window with results -->
   <PlSlideModal v-model="data.fastqcReportOpen" width="95%">
     <template #title>
-      Results for {{ (data.selectedSample ? app.model.outputs.labels?.[data.selectedSample] :
-        undefined) ?? "..." }}
+      Results for
+      {{
+        (data.selectedSample ? app.model.outputs.labels?.[data.selectedSample] : undefined) ?? "..."
+      }}
     </template>
     <ReportPanel v-model="data.selectedSample" />
   </PlSlideModal>

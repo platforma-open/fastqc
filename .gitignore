@@ -8,3 +8,7 @@ work/
 vite.config.*.timestamp-*
 log/
 *.idea
+software/**/*.tgz
+.DS_Store
+.vscode/sftp.json
+test-dry-run.json
