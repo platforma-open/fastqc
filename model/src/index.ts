@@ -1,120 +1,91 @@
-import type { InferOutputsType, PlRef, TreeNodeAccessor } from '@platforma-sdk/model';
-import {
-  BlockModel,
-  isPColumnSpec,
-  parseResourceMap,
-} from '@platforma-sdk/model';
+import type { InferOutputsType, TreeNodeAccessor } from "@platforma-sdk/model";
+import { BlockModelV3, isPColumnSpec, parseResourceMap } from "@platforma-sdk/model";
+import { blockDataModel } from "./dataModel";
+import type { BlockArgs } from "./types";
+
+export { blockDataModel } from "./dataModel";
+export * from "./types";
 
 /** Extract zip archive URL, skipping non-blob resources (e.g. empty json/object from single-end data with no R2) */
 const extractZipURL = (acc: TreeNodeAccessor) => {
-  if (acc.resourceType.name === 'json/object') return undefined;
-  return acc.extractArchiveAndGetURL('zip');
+  if (acc.resourceType.name === "json/object") return undefined;
+  return acc.extractArchiveAndGetURL("zip");
 };
 
-// Block arguments coming from the user interface
-export type BlockArgs = {
-  // Reference to the fastq data
-  refData?: PlRef;
-
-  // Block title
-  title?: string;
-};
-
-// // UI state
-// export type UiState = {
-// };
-
-export const model = BlockModel.create()
-
-  .withArgs<BlockArgs>({
+export const platforma = BlockModelV3.create(blockDataModel)
+  // Only refData reaches the workflow; title is display-only. Selecting a
+  // dataset stales the block (user presses Run) — matches the old argsValid gate.
+  .args<BlockArgs>((data) => {
+    if (data.refData === undefined) throw new Error("Input dataset is required");
+    return { refData: data.refData };
   })
-
-  .withUiState({
-  })
-
-  // Activate "Run" button only after input dataset is selected
-  .argsValid((ctx) => ctx.args.refData !== undefined)
 
   // Find possible options for the fastq input (used in Select dataset button)
-  .output('dataOptions', (ctx) => {
+  .output("dataOptions", (ctx) => {
     return ctx.resultPool.getOptions((v) => {
       if (!isPColumnSpec(v)) return false;
       const domain = v.domain;
       return (
-        v.name === 'pl7.app/sequencing/data'
-        && (v.valueType as string) === 'File'
-        && domain !== undefined
-        && (domain['pl7.app/fileExtension'] === 'fastq'
-          || domain['pl7.app/fileExtension'] === 'fastq.gz')
+        v.name === "pl7.app/sequencing/data" &&
+        (v.valueType as string) === "File" &&
+        domain !== undefined &&
+        (domain["pl7.app/fileExtension"] === "fastq" ||
+          domain["pl7.app/fileExtension"] === "fastq.gz")
       );
     });
   })
 
   // Returns true if the block is currently in "running" state
-  .output('isRunning', (ctx) => ctx.outputs?.getIsReadyOrError() === false)
+  .output("isRunning", (ctx) => ctx.outputs?.getIsReadyOrError() === false)
 
   // Get real labels associated to each imported file
-  .output('labels', (ctx) => {
-    const inputRef = ctx.args.refData;
+  .output("labels", (ctx) => {
+    const inputRef = ctx.data.refData;
     if (inputRef === undefined) return undefined;
 
     const inputSpec = ctx.resultPool.getPColumnSpecByRef(inputRef);
     if (inputSpec === undefined) return undefined;
 
-    const labels = ctx.findLabels(inputSpec.axesSpec[0]);
+    const labels = ctx.resultPool.findLabels(inputSpec.axesSpec[0]);
     if (!labels) return undefined;
 
     return labels;
   })
 
   // FastQC progress form logs
-  .output('fastqcProgress', (wf) => {
+  .output("fastqcProgress", (ctx) => {
     return parseResourceMap(
-      wf.outputs?.resolve('fastQCstdout'),
+      ctx.outputs?.resolve("fastQCstdout"),
       (acc) => acc.getLogHandle(),
       false,
     );
   })
 
   // Last line (on the go) from FastQC log output
-  .output('fastqcProgressLine', (wf) => {
+  .output("fastqcProgressLine", (ctx) => {
     return parseResourceMap(
-      wf.outputs?.resolve('fastQCstdout'),
-      // Return last line that contains string in ()
-      // Also returns if process is done or not
-      (acc) => acc.getProgressLogWithInfo(''),
+      ctx.outputs?.resolve("fastQCstdout"),
+      // Return last line that contains string in (); also reports done/not-done
+      (acc) => acc.getProgressLogWithInfo(""),
       false,
     );
   })
 
   // Reference to zip file with html content created by FastQC
-  .output('FastQCzipR1', (wf) => {
-    return parseResourceMap(
-      wf.outputs?.resolve('FastQCzipR1'),
-      extractZipURL,
-      false,
-    );
+  .output("FastQCzipR1", (ctx) => {
+    return parseResourceMap(ctx.outputs?.resolve("FastQCzipR1"), extractZipURL, false);
   })
 
   // Reference to zip file with html content created by FastQC
-  .output('FastQCzipR2', (wf) => {
-    return parseResourceMap(
-      wf.outputs?.resolve('FastQCzipR2'),
-      extractZipURL,
-      false,
-    );
+  .output("FastQCzipR2", (ctx) => {
+    return parseResourceMap(ctx.outputs?.resolve("FastQCzipR2"), extractZipURL, false);
   })
 
-  .sections([
-    { type: 'link', href: '/', label: 'Main' },
-  ])
+  .sections(() => [{ type: "link" as const, href: "/" as const, label: "Main" }])
 
-  .title((ctx) =>
-    ctx.args.title
-      ? `FastQC - ${ctx.args.title}`
-      : 'FastQC',
-  )
+  .title((ctx) => (ctx.data.title ? `FastQC - ${ctx.data.title}` : "FastQC"))
 
   .done();
 
-export type BlockOutputs = InferOutputsType<typeof model>;
+export type Platforma = typeof platforma;
+export type BlockOutputs = InferOutputsType<typeof platforma>;
