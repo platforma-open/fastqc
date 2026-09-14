@@ -17,7 +17,6 @@
     "@platforma-open/babraham.software-fastqc": "catalog:",
     "@platforma-sdk/tengo-builder": "catalog:",
     "@platforma-sdk/test": "catalog:",
-    "shx": "catalog:",
-    "vitest": "catalog:"
+    "shx": "catalog:"
   }
 }
