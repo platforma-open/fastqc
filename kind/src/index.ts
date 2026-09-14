@@ -1,49 +1,76 @@
 import { assertParamsObject, defineBlockKind } from "@platforma-sdk/block-kind";
+import type { PlRef } from "@platforma-sdk/model";
+import { isPlRef } from "@platforma-sdk/model";
+import { isString } from "es-toolkit";
 import { name, version } from "../package.json" with { type: "json" };
 
 /**
- * This block's init-params contract — the shape a block of this kind receives
- * at creation, and exactly what a project template serializes for it.
+ * This block's init-params contract — what a creator or a project template supplies to seed a new
+ * instance. FastQC has no settings: it reports on whatever dataset it is pointed at, so the whole
+ * contract is that choice.
  *
- * TODO(block-kind): replace `NEEDS_BLOCK_PARAMS` with the real params shape, then
- * wire the model's `init(({ params }) => …)` to consume them. If this block takes
- * no author-supplied params, set it to `Record<string, never>` deliberately.
+ * `title` is the chosen dataset's own label, which the UI writes in the same gesture as `refData`
+ * and nothing re-derives afterwards. It is carried rather than recomputed because a template that
+ * restored the input alone would name the block plain "FastQC" while showing that dataset's
+ * results.
  *
- * This is an intentional sentinel: `NEEDS_BLOCK_PARAMS` is an undefined type, so
- * the block fails to typecheck (TS2304) until the contract is chosen on purpose.
- * A scaffolded-but-unmigrated block must never compile with an empty contract by
- * default — see the block-kind migration recipe in the `block-dev` skill.
+ * Both fields are optional: a block may be created without a template, and a template need not set
+ * either.
  */
-export type BlockParams = NEEDS_BLOCK_PARAMS;
+export type BlockParams = {
+  /** The sequencing data column this block reports on. */
+  refData?: PlRef;
+  /** The label of the dataset `refData` points at, shown in the block's title. */
+  title?: string;
+};
 
 /**
- * The same contract at runtime, for params that arrive from a template file rather than
- * from typed code — the only point that can catch a hand-written entry being wrong.
- *
- * TODO(block-kind): read each key `BlockParams` declares and say what it must be, then
- * return them. Plain TypeScript is the default here: a kind owes no schema library, and a
- * check written by hand is held to the contract by the return type. Reach for a validation
- * library only where the shape earns it, and add it to this package's dependencies yourself.
- *
- * Check the fields the contract requires, and stop there. A key the contract does not name
- * needs no rejection: it is dropped by not being read.
- *
- * This is a second intentional sentinel. The function has to return `BlockParams`, so
- * `return {}` stops compiling the moment the contract declares a required field — the check
- * cannot drift from the contract by being left behind. Never satisfy it with a cast: `value
- * as BlockParams` compiles today and checks nothing forever.
+ * The contract at runtime, for params arriving from a template file rather than typed code. An
+ * absent field is always allowed — every param is optional and the block's own default takes
+ * over — so each guard runs only on what is present. Keys the contract does not name are dropped
+ * by never being read.
  */
 function parseInitializationParams(value: unknown): BlockParams {
   assertParamsObject(value);
 
-  return {};
+  const params: Record<string, unknown> = {};
+  for (const [field, { is, must }] of Object.entries(CONTRACT)) {
+    const v = value[field];
+    if (v === undefined) continue;
+    if (!is(v)) throw new Error(`'${field}' must be ${must}.`);
+    params[field] = v;
+  }
+  return params as BlockParams;
 }
 
-// Identity (`name`/`version`) comes from this package's own `package.json`, so
-// the on-wire `{name}@{version}` reference can never drift from what npm
-// publishes; the bundler inlines the JSON import.
+// Identity (`name`/`version`) comes from this package's own `package.json`, so the on-wire
+// `{name}@{version}` reference can never drift from what npm publishes; the bundler inlines the
+// JSON import.
 export const kind = defineBlockKind<BlockParams>({
   name,
   version,
   parseInitializationParams,
 });
+
+// ---------------------------------------------------------------------------
+// Internals
+// ---------------------------------------------------------------------------
+
+type Guard<T> = (v: unknown) => v is T;
+
+/** A guard plus how to finish the sentence "'field' must be …". */
+type Check<T> = { is: Guard<T>; must: string };
+
+function check<T>(is: Guard<T>, must: string): Check<T> {
+  return { is, must };
+}
+
+/**
+ * The runtime half of the contract. The `satisfies` clause is what stops it drifting: every field
+ * `BlockParams` declares must appear here, and each guard must narrow to that field's own type —
+ * so adding a param without a check stops compiling.
+ */
+const CONTRACT = {
+  refData: check(isPlRef, "a reference to a FASTQ dataset"),
+  title: check(isString, "a string"),
+} satisfies { [K in keyof Required<BlockParams>]: Check<NonNullable<BlockParams[K]>> };
