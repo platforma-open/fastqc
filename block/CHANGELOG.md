@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.fastqc
 
+## 2.3.1
+
+### Patch Changes
+
+- 4fa9205: Move to workflow-tengo 6.11.1
+
 ## 2.3.0
 
 ### Minor Changes
