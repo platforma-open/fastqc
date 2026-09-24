@@ -8971,7 +8971,7 @@ snapshots:
       '@milaboratories/pl-middle-layer': 1.71.4(@bytecodealliance/preview2-shim@0.20.2)(@types/node@24.5.2)
       '@milaboratories/pl-tree': 1.14.3
       '@platforma-sdk/model': 1.83.9
-      '@vitest/coverage-istanbul': 4.1.11(vitest@4.1.11(@types/node@24.5.2)(@vitest/coverage-istanbul@4.1.11(vitest@4.0.18(@types/node@24.5.2)(lightningcss@1.33.0)(yaml@2.8.1)))(vite@8.3.0(@types/node@24.5.2)(esbuild@0.28.2)(yaml@2.8.1)))
+      '@vitest/coverage-istanbul': 4.1.11(vitest@4.1.11)
       vitest: 4.1.11(@types/node@24.5.2)(@vitest/coverage-istanbul@4.1.11(vitest@4.0.18(@types/node@24.5.2)(lightningcss@1.33.0)(yaml@2.8.1)))(vite@8.3.0(@types/node@24.5.2)(esbuild@0.28.2)(yaml@2.8.1))
     transitivePeerDependencies:
       - '@bytecodealliance/preview2-shim'
@@ -11868,7 +11868,7 @@ snapshots:
       vite: 8.3.0(@types/node@24.5.2)(esbuild@0.28.2)(yaml@2.8.1)
       vue: 3.5.24(typescript@7.0.2)
 
-  '@vitest/coverage-istanbul@4.1.11(vitest@4.1.11(@types/node@24.5.2)(@vitest/coverage-istanbul@4.1.11(vitest@4.0.18(@types/node@24.5.2)(lightningcss@1.33.0)(yaml@2.8.1)))(vite@8.3.0(@types/node@24.5.2)(esbuild@0.28.2)(yaml@2.8.1)))':
+  '@vitest/coverage-istanbul@4.1.11(vitest@4.1.11)':
     dependencies:
       '@babel/core': 7.29.7
       '@istanbuljs/schema': 0.1.6
@@ -14328,7 +14328,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 24.5.2
-      '@vitest/coverage-istanbul': 4.1.11(vitest@4.1.11(@types/node@24.5.2)(@vitest/coverage-istanbul@4.1.11(vitest@4.0.18(@types/node@24.5.2)(lightningcss@1.33.0)(yaml@2.8.1)))(vite@8.3.0(@types/node@24.5.2)(esbuild@0.28.2)(yaml@2.8.1)))
+      '@vitest/coverage-istanbul': 4.1.11(vitest@4.1.11)
     transitivePeerDependencies:
       - msw
 
