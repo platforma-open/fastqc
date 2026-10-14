@@ -16,8 +16,10 @@ const sampleId = defineModel<string | undefined>();
 const reactiveFileContent = ReactiveFileContent.useGlobal();
 
 // Button labels displayed on top of sliding window to define tabs by PlBtnGroup
-// Tabs: the reads of the run's dataset, or both when it does not say
-const reads = computed<readonly Read[]>(() => app.model.outputs.reads ?? ["R1", "R2"]);
+// Tabs: the sample's reads, or both while they are not known
+const reads = computed<readonly Read[]>(
+  () => (sampleId.value && app.model.outputs.sampleReads?.[sampleId.value]) || ["R1", "R2"],
+);
 const options = computed(() => reads.value.map((read) => ({ label: read, value: read })));
 
 // Reference to tab opened by default

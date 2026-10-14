@@ -93,24 +93,29 @@ export const platforma = BlockModelV3.create({ dataModel, kind })
     return labels;
   })
 
-  // Reads FastQC reports on for the run's dataset: R1, plus R2 for paired-end. FASTQ producers list
-  // the dataset's read indices in the read-index axis domain; the workflow only QCs R1 and R2.
-  // Undefined when the producer does not write that domain.
-  .output("reads", (ctx) => {
+  // Reads FastQC reports on, per sample of the run's dataset: R1, plus R2 where the sample has it.
+  // Read from the keys ([sampleId, readIndex]) of the dataset's own files, so a paired-end sample is
+  // known as such before any of its reports exist; the workflow only QCs R1 and R2.
+  // Undefined until the dataset's file list is final.
+  .output("sampleReads", (ctx) => {
     const inputRef = ctx.activeArgs?.refData;
     if (inputRef === undefined) return undefined;
 
-    const readIndices =
-      ctx.resultPool.getPColumnSpecByRef(inputRef)?.axesSpec[1]?.domain?.["pl7.app/readIndices"];
-    if (readIndices === undefined) return undefined;
+    const files = parseResourceMap(
+      ctx.resultPool.getPColumnByRef(inputRef)?.data,
+      () => true,
+      true,
+    );
+    if (!files.isComplete) return undefined;
 
-    try {
-      const indices = JSON.parse(readIndices) as unknown;
-      if (!Array.isArray(indices)) return undefined;
-      return QC_READS.filter((r) => indices.includes(r));
-    } catch {
-      return undefined;
+    const sampleReads: Record<string, QcRead[]> = {};
+    for (const { key } of files.data) {
+      const read = QC_READS.find((r) => r === key[1]);
+      if (read !== undefined) (sampleReads[String(key[0])] ??= []).push(read);
     }
+    for (const reads of Object.values(sampleReads))
+      reads.sort((a, b) => QC_READS.indexOf(a) - QC_READS.indexOf(b));
+    return sampleReads;
   })
 
   // FastQC progress form logs
@@ -177,6 +182,7 @@ export type BlockOutputs = InferOutputsType<typeof platforma>;
 
 /** Read indices the workflow runs FastQC on, in processing order (`fastqc.tpl.tengo`). */
 const QC_READS = ["R1", "R2"] as const;
+type QcRead = (typeof QC_READS)[number];
 
 /** Whether the run's outputs carry the HTML reports; results of earlier block versions do not. */
 const hasHtmlReports = (outputs: TreeNodeAccessor | undefined): boolean =>

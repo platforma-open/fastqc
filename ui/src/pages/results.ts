@@ -89,16 +89,24 @@ export const resultMap = computed((): Record<string, ResultEntry> | undefined =>
   // reads false right after Run, before the workflow outputs exist.
   if (sampleIds.size === 0) return outputs.fastqcProgress?.isComplete ? {} : undefined;
 
+  // All reports are known once the report maps are final (the current ones, or for results of earlier
+  // versions the archives)
+  const reportsFinal =
+    (outputs.FastQChtmlR1?.isComplete && outputs.FastQChtmlR2?.isComplete) ||
+    (outputs.FastQCzipR1?.isComplete && outputs.FastQCzipR2?.isComplete);
+
   const r: Record<string, ResultEntry> = {};
   for (const sampleId of sampleIds) {
     const sampleReports = reports[sampleId] ?? {};
-    // Without the dataset's read list, a sample is done once its R1 report and, if one exists, its
-    // R2 report can be opened.
-    const expected: readonly Read[] = outputs.reads ?? (sampleReports.R2 ? ["R1", "R2"] : ["R1"]);
-    const percent = samplePercent(progressLines[sampleId], expected);
+    // The sample's reads from its input files. Without them, the reports it has are all it will
+    // have only once the report maps are final; until then completion stays unknown.
+    const expected: readonly Read[] | undefined =
+      outputs.sampleReads?.[sampleId] ??
+      (reportsFinal ? (["R1", "R2"] as const).filter((read) => sampleReports[read]) : undefined);
+    const percent = samplePercent(progressLines[sampleId], expected ?? []);
 
     let progress: string;
-    if (expected.every((read) => sampleReports[read] !== undefined)) progress = PROGRESS_DONE;
+    if (expected?.every((read) => sampleReports[read] !== undefined)) progress = PROGRESS_DONE;
     else if (!progressLines[sampleId]?.trim()) progress = PROGRESS_QUEUED;
     else if (percent === undefined) progress = PROGRESS_STARTED;
     else if (percent >= 100) progress = PROGRESS_REPORT;
