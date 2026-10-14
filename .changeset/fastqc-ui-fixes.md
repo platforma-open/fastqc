@@ -19,3 +19,4 @@ Fix the FastQC table and report panel:
 - the settings panel dims the page behind it and closes when the run starts
 - FastQC results are kept for 24 hours as intended; the cache time was given in milliseconds where nanoseconds are expected, so it lasted 86 ms
 - datasets with index reads (I1, I2) no longer fail with "malformed read index"; index reads are still not checked
+- update the SDK to the latest versions (model and ui-vue 1.85.0, workflow-tengo 6.16.0, block-tools 2.16.13, tengo-builder 4.1.11)
