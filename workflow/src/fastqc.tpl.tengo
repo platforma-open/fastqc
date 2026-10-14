@@ -4,113 +4,98 @@ ll := import("@platforma-sdk/workflow-tengo:ll")
 exec := import("@platforma-sdk/workflow-tengo:exec")
 file := import("@platforma-sdk/workflow-tengo:file")
 assets := import("@platforma-sdk/workflow-tengo:assets")
-pframes := import("@platforma-sdk/workflow-tengo:pframes")
 pConstants := import("@platforma-sdk/workflow-tengo:pframes.constants")
 plapi := import("plapi")
 
-
-
-self.defineOutputs("FastQCzipR1",
+self.defineOutputs(
 	"FastQChtmlR1",
-    "FastQCzipR2",
 	"FastQChtmlR2",
-    "fastQCstdout")
-
+	"fastQCstdout"
+)
 
 self.body(func(inputs) {
 	inputData := inputs[pConstants.VALUE_FIELD_NAME]
 	fileExtension := inputs.fileExtension
-    fastqcRun := exec.builder()
-    if plapi.osSeparator == "\\" {
-        fastqcRun = fastqcRun.
-            software(assets.importSoftware("@platforma-open/babraham.software-fastqc:windows"))
-    } else {
-        fastqcRun = fastqcRun.
-            software(assets.importSoftware("@platforma-open/babraham.software-fastqc:unix"))
-    }
-                // We havwe to use the commands same way they are named within FastQCs java application
-                // Force output in working folder (default data folder)
-                fastqcRun = fastqcRun.
-                arg("-Dfastqc.output_dir=.").
-                // CPUs per sample
-                arg("-Dfastqc.threads=1")
-                // Input fastq files added below
-                
-    
 
+	fastqcRun := exec.builder()
+	if plapi.osSeparator == "\\" {
+		fastqcRun = fastqcRun.software(assets.importSoftware("@platforma-open/babraham.software-fastqc:windows"))
+	} else {
+		fastqcRun = fastqcRun.software(assets.importSoftware("@platforma-open/babraham.software-fastqc:unix"))
+	}
 
-    // get files by index
+	// We havwe to use the commands same way they are named within FastQCs java application
+	// Force output in working folder (default data folder)
+	fastqcRun = fastqcRun.
+		arg("-Dfastqc.output_dir=.").
+		// CPUs per sample
+		arg("-Dfastqc.threads=1")
+	// Input fastq files added below
+
+	// get files by index
+	// (R1, R2, and index reads I1, I2)
 	filesByRIndex := {}
 	for sKey, inputFile in inputData.inputs() {
-		key := json.decode(sKey)
-		r := key[0]
-		if (r[0] != 'R' && r[0] != "I") || (r[1] != '1' && r[1] != '2') || len(r) != 2 {
+		r := json.decode(sKey)[0]
+		if len(r) != 2 || (r[0] != 'R' && r[0] != 'I') || (r[1] != '1' && r[1] != '2') {
 			ll.panic("malformed read index: %v", r)
 		}
 		filesByRIndex[r] = inputFile
 	}
 
+	// Only R1 and R2 are checked, in this order; R2 is absent for single-end data. The UI reads
+	// the progress from these file names (`ui/src/pages/results.ts`).
 	nReads := 0
-
 	for rIndex in ["R1", "R2"] {
 		inputFile := filesByRIndex[rIndex]
-        // single end case
+		// single end case
 		if is_undefined(inputFile) {
 			continue
 		}
 		nReads = nReads + 1
 		fileName := "input_" + rIndex + "." + fileExtension
-        outZip := "input_" + rIndex + "_fastqc.zip"
-        outHtml := "input_" + rIndex + "_fastqc.html"
-		ll.print("print fileName in loop", fileName)
-        // Include files in working enironment
+		// Include files in working enironment
 		fastqcRun = fastqcRun.
-            addFile(fileName, inputFile).
+			addFile(fileName, inputFile).
 			arg(fileName).
-            saveFile(outZip).
-            saveFile(outHtml)
+			// The archive is no longer passed on, but still saved: dropping it would change the
+			// run's command, so earlier runs on the same data could no longer be reused
+			saveFile("input_" + rIndex + "_fastqc.zip").
+			saveFile("input_" + rIndex + "_fastqc.html")
 	}
-    
-    ll.assert(nReads != 0, "No read indexes")
+	ll.assert(nReads != 0, "No read indexes")
 
-    fastqcRun = fastqcRun.
-        printErrStreamToStdout().
+	fastqcRun = fastqcRun.
+		printErrStreamToStdout().
 		saveStdoutStream().
-		cache(24 * 60 * 60 * 1000).
+		cacheHours(24).
 		run()
-	
-    // Store standard output for analysis progress bar
-    fastQCstdout := fastqcRun.getStdoutStream()
-    // fastqcStdout := fastqcRun.getFile("stdout.txt")
-    // stderr has the progress percentages until 95%
-    /* Started analysis of subsampled20_SRR22319482_1.fastq.gz
-       Approx 5% complete for subsampled20_SRR22319482_1.fastq.gz
-       Approx 10% complete for subsampled20_SRR22319482_1.fastq.gz
-       ...
-       Approx 95% complete for subsampled20_SRR22319482_1.fastq.gz
-    */
-
-    // stdout has the finish confirmation
-    /* application/octet-stream
-      Analysis complete for subsampled20_SRR22319482_1.fastq.gz   
-    */ 
 
 	output := {
-        fastQCstdout: fastQCstdout
+		// Store standard output for analysis progress bar
+		fastQCstdout: fastqcRun.getStdoutStream()
 	}
+	// stderr has the progress percentages until 95%
+	/* Started analysis of subsampled20_SRR22319482_1.fastq.gz
+	   Approx 5% complete for subsampled20_SRR22319482_1.fastq.gz
+	   Approx 10% complete for subsampled20_SRR22319482_1.fastq.gz
+	   ...
+	   Approx 95% complete for subsampled20_SRR22319482_1.fastq.gz
+	*/
 
-    // get output files for the read indexes we have
-    for rIndex in ["R1", "R2"] {
-		inputFile := filesByRIndex[rIndex]
-        // single end case, return empty outputs
-		if is_undefined(inputFile) {
-			output["FastQCzip" + rIndex] = {}
-            output["FastQChtml" + rIndex] = {}
-            continue
+	// stdout has the finish confirmation
+	/* application/octet-stream
+	  Analysis complete for subsampled20_SRR22319482_1.fastq.gz
+	*/
+
+	// get output files for the read indexes we have
+	for rIndex in ["R1", "R2"] {
+		// single end case, return empty outputs
+		if is_undefined(filesByRIndex[rIndex]) {
+			output["FastQChtml" + rIndex] = {}
+			continue
 		}
-        output["FastQCzip" + rIndex] = file.exportFile(fastqcRun.getFile("input_" + rIndex + "_fastqc.zip"))
-        output["FastQChtml" + rIndex] = file.exportFile(fastqcRun.getFile("input_" + rIndex + "_fastqc.html"))
-    }
+		output["FastQChtml" + rIndex] = file.exportFile(fastqcRun.getFile("input_" + rIndex + "_fastqc.html"))
+	}
 	return output
-
 })

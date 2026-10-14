@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PlRef, ProgressLogWithInfo } from "@platforma-sdk/model";
+import type { PlRef } from "@platforma-sdk/model";
 import { plRefsEqual } from "@platforma-sdk/model";
 import {
   AgGridTheme,
@@ -16,10 +16,16 @@ import {
 import { refDebounced } from "@vueuse/core";
 import type { ColDef, GridApi, GridOptions, GridReadyEvent } from "ag-grid-enterprise";
 import { AgGridVue } from "ag-grid-vue3";
-import { computed, reactive, shallowRef } from "vue";
+import { computed, reactive, shallowRef, watch } from "vue";
 import { useApp } from "../app";
 import ReportPanel from "./ReportPanel.vue";
-import { resultMap } from "./results";
+import {
+  PROGRESS_DONE,
+  PROGRESS_QUEUED,
+  PROGRESS_REPORT,
+  PROGRESS_STARTED,
+  resultMap,
+} from "./results";
 
 const app = useApp();
 
@@ -33,6 +39,14 @@ const data = reactive<{
   selectedSample: undefined,
 });
 
+// Close the settings once the run starts, so the progress table is in view
+watch(
+  () => app.model.outputs.isRunning,
+  (isRunning) => {
+    if (isRunning) data.settingsOpen = false;
+  },
+);
+
 // Needed for analysis stage table
 const gridApi = shallowRef<GridApi>();
 const onGridReady = (params: GridReadyEvent) => {
@@ -41,7 +55,7 @@ const onGridReady = (params: GridReadyEvent) => {
 type FastQCOverviewRow = {
   sampleId: string;
   sampleLabel: string;
-  progress?: ProgressLogWithInfo;
+  progress: string;
 };
 /** Rows for ag-table */
 const resultsComputed = computed<FastQCOverviewRow[] | undefined>(() => {
@@ -51,16 +65,27 @@ const resultsComputed = computed<FastQCOverviewRow[] | undefined>(() => {
     rows.push({
       sampleId: id,
       sampleLabel: resultMap.value[id].sampleLabel,
-      progress: resultMap.value[id].fastqcProgressLine,
+      progress: resultMap.value[id].progress,
     });
   }
 
-  return rows;
+  // Samples arrive in the order their results do, which changes between updates. Like the
+  // standard data table, rows are ordered by their key (the sample id) unless a column is sorted.
+  return rows.sort((a, b) => (a.sampleId < b.sampleId ? -1 : a.sampleId > b.sampleId ? 1 : 0));
 });
 
 const results = refDebounced(resultsComputed, 100);
 
-const ProgressPattern = /Approx ([0-9]+)%/;
+// Rows stay undefined until the block has run, so the grid shows this overlay instead of "Empty"
+const overlayParams = computed(() =>
+  app.model.outputs.hasRun
+    ? { variant: "running" as const }
+    : {
+        variant: "not-ready" as const,
+        notReadyText: "Configure the settings and click 'Run' to see per-sample progress",
+      },
+);
+
 // How to display content in table
 const columnDefs: ColDef[] = [
   {
@@ -75,36 +100,25 @@ const columnDefs: ColDef[] = [
       invokeRowsOnDoubleClick: true,
     },
   },
-  createAgGridColDef({
+  createAgGridColDef<FastQCOverviewRow, string>({
     colId: "fastqc",
     field: "progress",
     headerName: "FastQC Progress",
     progress: (progress) => {
-      if (progress === undefined)
-        return {
-          status: "not_started",
-        };
-
-      if (progress.progressLine?.startsWith("Analysis complete")) {
-        return {
-          status: "done",
-        };
+      switch (progress) {
+        case PROGRESS_DONE:
+          return { status: "done" };
+        // No percent to show for these: an empty suffix hides the cell's default "0%"
+        case PROGRESS_REPORT:
+          return { status: "running", text: "Preparing report", suffix: "" };
+        case PROGRESS_STARTED:
+          return { status: "running", text: "Analysis", suffix: "" };
+        case PROGRESS_QUEUED:
+        case undefined:
+          return { status: "not_started", text: "Queued" };
+        default:
+          return { status: "running", text: "Analysis", percent: Number(progress) };
       }
-
-      if (!progress.progressLine)
-        return {
-          status: "running",
-        };
-
-      let percent = 0;
-      const match = progress.progressLine.match(ProgressPattern);
-      if (match) percent = Number(match[1]);
-
-      return {
-        percent: percent,
-        text: "Analysis",
-        status: "running",
-      };
     },
   }),
 ];
@@ -156,7 +170,7 @@ function setInput(inputRef?: PlRef) {
       :rowData="results"
       :columnDefs="columnDefs"
       :grid-options="gridOptions"
-      :loadingOverlayComponentParams="{ notReady: true }"
+      :loadingOverlayComponentParams="overlayParams"
       :defaultColDef="defaultColDef"
       :loadingOverlayComponent="PlAgOverlayLoading"
       :noRowsOverlayComponent="PlAgOverlayNoRows"
@@ -165,7 +179,7 @@ function setInput(inputRef?: PlRef) {
   </PlBlockPage>
 
   <!-- Dataset sliding window to select input Dataset -->
-  <PlSlideModal v-model="data.settingsOpen">
+  <PlSlideModal v-model="data.settingsOpen" shadow>
     <template #title>Settings</template>
     <PlDropdownRef
       v-model="app.model.data.refData"
@@ -177,7 +191,7 @@ function setInput(inputRef?: PlRef) {
   </PlSlideModal>
 
   <!-- Slide window with results -->
-  <PlSlideModal v-model="data.fastqcReportOpen" width="95%">
+  <PlSlideModal v-model="data.fastqcReportOpen" width="min(1250px, 95%)">
     <template #title>
       Results for
       {{

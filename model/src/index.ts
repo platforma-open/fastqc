@@ -71,9 +71,15 @@ export const platforma = BlockModelV3.create({ dataModel, kind })
   // Returns true if the block is currently in "running" state
   .output("isRunning", (ctx) => ctx.outputs?.getIsReadyOrError() === false)
 
+  // True once Run was pressed; until then the UI shows the "configure and run" placeholder
+  .output("hasRun", (ctx) => ctx.activeArgs !== undefined)
+
   // Get real labels associated to each imported file
+  // Sample labels of the dataset the shown results were computed for. Read from `activeArgs`, not
+  // `data`: after another dataset is picked the outputs still hold the previous run, and its
+  // samples must keep their names until the block is run again.
   .output("labels", (ctx) => {
-    const inputRef = ctx.data.refData;
+    const inputRef = ctx.activeArgs?.refData;
     if (inputRef === undefined) return undefined;
 
     const inputSpec = ctx.resultPool.getPColumnSpecByRef(inputRef);
@@ -85,6 +91,26 @@ export const platforma = BlockModelV3.create({ dataModel, kind })
     if (!labels) return undefined;
 
     return labels;
+  })
+
+  // Reads FastQC reports on for the run's dataset: R1, plus R2 for paired-end. FASTQ producers list
+  // the dataset's read indices in the read-index axis domain; the workflow only QCs R1 and R2.
+  // Undefined when the producer does not write that domain.
+  .output("reads", (ctx) => {
+    const inputRef = ctx.activeArgs?.refData;
+    if (inputRef === undefined) return undefined;
+
+    const readIndices =
+      ctx.resultPool.getPColumnSpecByRef(inputRef)?.axesSpec[1]?.domain?.["pl7.app/readIndices"];
+    if (readIndices === undefined) return undefined;
+
+    try {
+      const indices = JSON.parse(readIndices) as unknown;
+      if (!Array.isArray(indices)) return undefined;
+      return QC_READS.filter((r) => indices.includes(r));
+    } catch {
+      return undefined;
+    }
   })
 
   // FastQC progress form logs
@@ -107,13 +133,28 @@ export const platforma = BlockModelV3.create({ dataModel, kind })
     );
   })
 
+  // Standalone HTML reports created by FastQC, read by the UI and shown inline
+  .output("FastQChtmlR1", (wf) => {
+    if (!hasHtmlReports(wf.outputs)) return undefined;
+    return parseResourceMap(wf.outputs?.resolve("FastQChtmlR1"), getHtmlHandle, false);
+  })
+
+  .output("FastQChtmlR2", (wf) => {
+    if (!hasHtmlReports(wf.outputs)) return undefined;
+    return parseResourceMap(wf.outputs?.resolve("FastQChtmlR2"), getHtmlHandle, false);
+  })
+
   // Reference to zip file with html content created by FastQC
+  // Only for results computed before the workflow passed the HTML reports on, so they stay
+  // viewable until the block runs again.
   .output("FastQCzipR1", (wf) => {
+    if (hasHtmlReports(wf.outputs)) return undefined;
     return parseResourceMap(wf.outputs?.resolve("FastQCzipR1"), extractZipURL, false);
   })
 
   // Reference to zip file with html content created by FastQC
   .output("FastQCzipR2", (wf) => {
+    if (hasHtmlReports(wf.outputs)) return undefined;
     return parseResourceMap(wf.outputs?.resolve("FastQCzipR2"), extractZipURL, false);
   })
 
@@ -121,7 +162,10 @@ export const platforma = BlockModelV3.create({ dataModel, kind })
 
   .templateParams(deriveTemplateParams)
 
-  .title((ctx) => (ctx.data.title ? `FastQC - ${ctx.data.title}` : "FastQC"))
+  .title(() => "FastQC")
+
+  // `data` can be undefined while the sidebar renders before block storage is parsed
+  .subtitle((ctx) => ctx.data?.title ?? "")
 
   .done();
 
@@ -130,6 +174,24 @@ export type BlockOutputs = InferOutputsType<typeof platforma>;
 // ---------------------------------------------------------------------------
 // Internals
 // ---------------------------------------------------------------------------
+
+/** Read indices the workflow runs FastQC on, in processing order (`fastqc.tpl.tengo`). */
+const QC_READS = ["R1", "R2"] as const;
+
+/** Whether the run's outputs carry the HTML reports; results of earlier block versions do not. */
+const hasHtmlReports = (outputs: TreeNodeAccessor | undefined): boolean =>
+  outputs !== undefined &&
+  [
+    ...outputs.listInputFields(),
+    ...outputs.listOutputFields(),
+    ...outputs.listDynamicFields(),
+  ].includes("FastQChtmlR1");
+
+/** File handle of an HTML report, skipping non-blob resources (single-end data has no R2) */
+const getHtmlHandle = (acc: TreeNodeAccessor) => {
+  if (acc.resourceType.name === "json/object") return undefined;
+  return acc.getFileHandle();
+};
 
 /** Extract zip archive URL, skipping non-blob resources (e.g. empty json/object from single-end data with no R2) */
 const extractZipURL = (acc: TreeNodeAccessor) => {
