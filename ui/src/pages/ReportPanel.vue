@@ -18,7 +18,7 @@ const reactiveFileContent = ReactiveFileContent.useGlobal();
 // Button labels displayed on top of sliding window to define tabs by PlBtnGroup
 // Tabs: the sample's reads, or both while they are not known
 const reads = computed<readonly Read[]>(
-  () => (sampleId.value && app.model.outputs.sampleReads?.[sampleId.value]) || ["R1", "R2"],
+  () => (sampleId.value ? resultMap.value?.[sampleId.value]?.reads : undefined) ?? ["R1", "R2"],
 );
 const options = computed(() => reads.value.map((read) => ({ label: read, value: read })));
 

@@ -93,31 +93,6 @@ export const platforma = BlockModelV3.create({ dataModel, kind })
     return labels;
   })
 
-  // Reads FastQC reports on, per sample of the run's dataset: R1, plus R2 where the sample has it.
-  // Read from the keys ([sampleId, readIndex]) of the dataset's own files, so a paired-end sample is
-  // known as such before any of its reports exist; the workflow only QCs R1 and R2.
-  // Undefined until the dataset's file list is final.
-  .output("sampleReads", (ctx) => {
-    const inputRef = ctx.activeArgs?.refData;
-    if (inputRef === undefined) return undefined;
-
-    const files = parseResourceMap(
-      ctx.resultPool.getPColumnByRef(inputRef)?.data,
-      () => true,
-      true,
-    );
-    if (!files.isComplete) return undefined;
-
-    const sampleReads: Record<string, QcRead[]> = {};
-    for (const { key } of files.data) {
-      const read = QC_READS.find((r) => r === key[1]);
-      if (read !== undefined) (sampleReads[String(key[0])] ??= []).push(read);
-    }
-    for (const reads of Object.values(sampleReads))
-      reads.sort((a, b) => QC_READS.indexOf(a) - QC_READS.indexOf(b));
-    return sampleReads;
-  })
-
   // FastQC progress form logs
   .output("fastqcProgress", (wf) => {
     return parseResourceMap(
@@ -138,15 +113,17 @@ export const platforma = BlockModelV3.create({ dataModel, kind })
     );
   })
 
-  // Standalone HTML reports created by FastQC, read by the UI and shown inline
+  // Standalone HTML reports created by FastQC, read by the UI and shown inline. Every sample has an
+  // entry for every read once its step starts: `null` when the sample has no such read (single-end
+  // data has no R2), `undefined` while the report is not ready, then its file handle.
   .output("FastQChtmlR1", (wf) => {
     if (!hasHtmlReports(wf.outputs)) return undefined;
-    return parseResourceMap(wf.outputs?.resolve("FastQChtmlR1"), getHtmlHandle, false);
+    return parseResourceMap(wf.outputs?.resolve("FastQChtmlR1"), getHtmlHandle, true);
   })
 
   .output("FastQChtmlR2", (wf) => {
     if (!hasHtmlReports(wf.outputs)) return undefined;
-    return parseResourceMap(wf.outputs?.resolve("FastQChtmlR2"), getHtmlHandle, false);
+    return parseResourceMap(wf.outputs?.resolve("FastQChtmlR2"), getHtmlHandle, true);
   })
 
   // Reference to zip file with html content created by FastQC
@@ -154,13 +131,13 @@ export const platforma = BlockModelV3.create({ dataModel, kind })
   // viewable until the block runs again.
   .output("FastQCzipR1", (wf) => {
     if (hasHtmlReports(wf.outputs)) return undefined;
-    return parseResourceMap(wf.outputs?.resolve("FastQCzipR1"), extractZipURL, false);
+    return parseResourceMap(wf.outputs?.resolve("FastQCzipR1"), extractZipURL, true);
   })
 
   // Reference to zip file with html content created by FastQC
   .output("FastQCzipR2", (wf) => {
     if (hasHtmlReports(wf.outputs)) return undefined;
-    return parseResourceMap(wf.outputs?.resolve("FastQCzipR2"), extractZipURL, false);
+    return parseResourceMap(wf.outputs?.resolve("FastQCzipR2"), extractZipURL, true);
   })
 
   .sections(() => [{ type: "link" as const, href: "/" as const, label: "Main" }])
@@ -180,10 +157,6 @@ export type BlockOutputs = InferOutputsType<typeof platforma>;
 // Internals
 // ---------------------------------------------------------------------------
 
-/** Read indices the workflow runs FastQC on, in processing order (`fastqc.tpl.tengo`). */
-const QC_READS = ["R1", "R2"] as const;
-type QcRead = (typeof QC_READS)[number];
-
 /** Whether the run's outputs carry the HTML reports; results of earlier block versions do not. */
 const hasHtmlReports = (outputs: TreeNodeAccessor | undefined): boolean =>
   outputs !== undefined &&
@@ -193,14 +166,18 @@ const hasHtmlReports = (outputs: TreeNodeAccessor | undefined): boolean =>
     ...outputs.listDynamicFields(),
   ].includes("FastQChtmlR1");
 
-/** File handle of an HTML report, skipping non-blob resources (single-end data has no R2) */
+/**
+ * File handle of an HTML report. The workflow puts an empty json/object in place of a read the
+ * sample does not have; `null` marks it as absent, where `undefined` would mean "not ready yet"
+ * and keep the map from ever completing.
+ */
 const getHtmlHandle = (acc: TreeNodeAccessor) => {
-  if (acc.resourceType.name === "json/object") return undefined;
+  if (acc.resourceType.name === "json/object") return null;
   return acc.getFileHandle();
 };
 
-/** Extract zip archive URL, skipping non-blob resources (e.g. empty json/object from single-end data with no R2) */
+/** Extract zip archive URL; `null` for the empty json/object of a read the sample does not have */
 const extractZipURL = (acc: TreeNodeAccessor) => {
-  if (acc.resourceType.name === "json/object") return undefined;
+  if (acc.resourceType.name === "json/object") return null;
   return acc.extractArchiveAndGetURL("zip");
 };
