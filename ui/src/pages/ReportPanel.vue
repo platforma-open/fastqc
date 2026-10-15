@@ -89,9 +89,22 @@ function onReportLoad(event: Event) {
       return;
     }
 
-    blockedLink.value = link.href;
+    blockedLink.value = withWorkingScheme(link.href);
     copied.value = false;
   });
+}
+
+// FastQC writes its own site as http:// in every version (HTMLReportArchive.java), and the site's
+// redirect from http to https is broken: it drops the "/" after the host. The https address works.
+const HTTPS_ONLY_HOSTS = new Set(["www.bioinformatics.babraham.ac.uk"]);
+function withWorkingScheme(href: string): string {
+  try {
+    const url = new URL(href);
+    if (url.protocol === "http:" && HTTPS_ONLY_HOSTS.has(url.hostname)) url.protocol = "https:";
+    return url.href;
+  } catch {
+    return href;
+  }
 }
 
 async function copyLink() {
