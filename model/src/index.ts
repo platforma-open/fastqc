@@ -71,9 +71,15 @@ export const platforma = BlockModelV3.create({ dataModel, kind })
   // Returns true if the block is currently in "running" state
   .output("isRunning", (ctx) => ctx.outputs?.getIsReadyOrError() === false)
 
+  // True once Run was pressed; until then the UI shows the "configure and run" placeholder
+  .output("hasRun", (ctx) => ctx.activeArgs !== undefined)
+
   // Get real labels associated to each imported file
+  // Sample labels of the dataset the shown results were computed for. Read from `activeArgs`, not
+  // `data`: after another dataset is picked the outputs still hold the previous run, and its
+  // samples must keep their names until the block is run again.
   .output("labels", (ctx) => {
-    const inputRef = ctx.data.refData;
+    const inputRef = ctx.activeArgs?.refData;
     if (inputRef === undefined) return undefined;
 
     const inputSpec = ctx.resultPool.getPColumnSpecByRef(inputRef);
@@ -107,21 +113,41 @@ export const platforma = BlockModelV3.create({ dataModel, kind })
     );
   })
 
+  // Standalone HTML reports created by FastQC, read by the UI and shown inline. Every sample has an
+  // entry for every read once its step starts: `null` when the sample has no such read (single-end
+  // data has no R2), `undefined` while the report is not ready, then its file handle.
+  .output("FastQChtmlR1", (wf) => {
+    if (!hasHtmlReports(wf.outputs)) return undefined;
+    return parseResourceMap(wf.outputs?.resolve("FastQChtmlR1"), getHtmlHandle, true);
+  })
+
+  .output("FastQChtmlR2", (wf) => {
+    if (!hasHtmlReports(wf.outputs)) return undefined;
+    return parseResourceMap(wf.outputs?.resolve("FastQChtmlR2"), getHtmlHandle, true);
+  })
+
   // Reference to zip file with html content created by FastQC
+  // Only for results computed before the workflow passed the HTML reports on, so they stay
+  // viewable until the block runs again.
   .output("FastQCzipR1", (wf) => {
-    return parseResourceMap(wf.outputs?.resolve("FastQCzipR1"), extractZipURL, false);
+    if (hasHtmlReports(wf.outputs)) return undefined;
+    return parseResourceMap(wf.outputs?.resolve("FastQCzipR1"), extractZipURL, true);
   })
 
   // Reference to zip file with html content created by FastQC
   .output("FastQCzipR2", (wf) => {
-    return parseResourceMap(wf.outputs?.resolve("FastQCzipR2"), extractZipURL, false);
+    if (hasHtmlReports(wf.outputs)) return undefined;
+    return parseResourceMap(wf.outputs?.resolve("FastQCzipR2"), extractZipURL, true);
   })
 
   .sections(() => [{ type: "link" as const, href: "/" as const, label: "Main" }])
 
   .templateParams(deriveTemplateParams)
 
-  .title((ctx) => (ctx.data.title ? `FastQC - ${ctx.data.title}` : "FastQC"))
+  .title(() => "FastQC")
+
+  // `data` can be undefined while the sidebar renders before block storage is parsed
+  .subtitle((ctx) => ctx.data?.title ?? "")
 
   .done();
 
@@ -131,8 +157,27 @@ export type BlockOutputs = InferOutputsType<typeof platforma>;
 // Internals
 // ---------------------------------------------------------------------------
 
-/** Extract zip archive URL, skipping non-blob resources (e.g. empty json/object from single-end data with no R2) */
+/** Whether the run's outputs carry the HTML reports; results of earlier block versions do not. */
+const hasHtmlReports = (outputs: TreeNodeAccessor | undefined): boolean =>
+  outputs !== undefined &&
+  [
+    ...outputs.listInputFields(),
+    ...outputs.listOutputFields(),
+    ...outputs.listDynamicFields(),
+  ].includes("FastQChtmlR1");
+
+/**
+ * File handle of an HTML report. The workflow puts an empty json/object in place of a read the
+ * sample does not have; `null` marks it as absent, where `undefined` would mean "not ready yet"
+ * and keep the map from ever completing.
+ */
+const getHtmlHandle = (acc: TreeNodeAccessor) => {
+  if (acc.resourceType.name === "json/object") return null;
+  return acc.getFileHandle();
+};
+
+/** Extract zip archive URL; `null` for the empty json/object of a read the sample does not have */
 const extractZipURL = (acc: TreeNodeAccessor) => {
-  if (acc.resourceType.name === "json/object") return undefined;
+  if (acc.resourceType.name === "json/object") return null;
   return acc.extractArchiveAndGetURL("zip");
 };

@@ -1,15 +1,13 @@
 wf := import("@platforma-sdk/workflow-tengo:workflow")
-exec := import("@platforma-sdk/workflow-tengo:exec")
-assets:= import("@platforma-sdk/workflow-tengo:assets")
+assets := import("@platforma-sdk/workflow-tengo:assets")
 llPFrames := import("@platforma-sdk/workflow-tengo:pframes.ll")
 
 // FastQC program template
 fastqcTpl := assets.importTemplate(":fastqc")
 
-
 // Prepare input inherited from previous job
-wf.prepare(func(args){
-	return{
+wf.prepare(func(args) {
+	return {
 		// reference to Fastq files
 		resolvedFastq: wf.resolve(args.refData, { errIfMissing: true })
 	}
@@ -17,30 +15,22 @@ wf.prepare(func(args){
 
 wf.body(func(args) {
 	input := args.resolvedFastq
-	inputSpec := input.spec
-	species := args.species
-
 
 	// Fastq or Fastq.gz
-	fileExtension := inputSpec.domain["pl7.app/fileExtension"]
+	fileExtension := input.spec.domain["pl7.app/fileExtension"]
 
 	aggregationTargets := [{
-		type: "Resource",
-		name: "FastQCzipR1"
-	}, {
 		type: "Resource",
 		name: "FastQChtmlR1"
 	}, {
 		type: "Resource",
-		name: "FastQCzipR2"
-	}, {
-		type: "Resource",
 		name: "FastQChtmlR2"
-	},{
+	}, {
 		type: "Resource",
 		name: "fastQCstdout"
 	}]
 
+	// Groups the files by sample (axis 0), so each run gets that sample's reads keyed by read index
 	fastqcResults := llPFrames.aggregate(
 		input.data, [1], fastqcTpl,
 		aggregationTargets,
@@ -50,45 +40,15 @@ wf.body(func(args) {
 		}
 	)
 
-	// @TODO: use it to allow html download from Platforma
-	// Create FastQC html output specs
-	// FastQChtmlR1Spec := {
-	// 	"fastQC.spec":
-	// 	{
-	// 		kind: "PColumn",
-	// 		name: "html",
-	// 		domain: {
-	// 			"pl7.app/blockId": blockId
-	// 		},
-	// 		valueType: "Double",
-	// 		axesSpec: [
-	// 			inputSpec.axesSpec[0],
-	// 			{
-	// 				"name": "pl7.app/fastQC/html",
-	// 				"type": "String",
-	// 				"domain": {
-	// 					"pl7.app/blockId": blockId,
-	// 					"pl7.app/species": species
-	// 				},
-	// 				"annotations": {
-	// 					"pl7.app/label": "FastQC"
-	// 				}
-	// 			}
-	// 			],
-	// 		annotations: {"pl7.app/label": "FastQC output html file"}
-	// 	},
-	// 	"fastQC.data": fastqcResults.output("FastQChtmlR1")
-	// }
-
 	return {
 		outputs: {
 			fastQCstdout: fastqcResults.output("fastQCstdout"),
-			FastQCzipR1: fastqcResults.output("FastQCzipR1"),
-			FastQCzipR2: fastqcResults.output("FastQCzipR2")
-			
+			// Standalone HTML reports, shown by the UI. Earlier versions passed on the report
+			// archives (FastQCzipR1/R2) instead; the model still reads those from older results.
+			FastQChtmlR1: fastqcResults.output("FastQChtmlR1"),
+			FastQChtmlR2: fastqcResults.output("FastQChtmlR2")
 		},
 
 		exports: {}
 	}
 })
-
