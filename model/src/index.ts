@@ -63,7 +63,9 @@ export const platforma = BlockModelV3.create({ dataModel, kind })
         (v.valueType as string) === "File" &&
         domain !== undefined &&
         (domain["pl7.app/fileExtension"] === "fastq" ||
-          domain["pl7.app/fileExtension"] === "fastq.gz")
+          domain["pl7.app/fileExtension"] === "fastq.gz") &&
+        // The workflow runs FastQC on each key's reads, found by this axis
+        v.axesSpec.some((axis) => axis.name === READ_INDEX_AXIS)
       );
     });
   })
@@ -91,6 +93,22 @@ export const platforma = BlockModelV3.create({ dataModel, kind })
     if (!labels) return undefined;
 
     return labels;
+  })
+
+  // Labels of the axes that, after the sample, tell apart the reports of one sample: the lane of a
+  // multi-lane dataset, the tags of a tagged one. Empty for a [sample, readIndex] dataset, where
+  // each sample has one report per read. Read from `activeArgs`, like `labels`.
+  .output("subKeyLabels", (ctx) => {
+    const inputRef = ctx.activeArgs?.refData;
+    if (inputRef === undefined) return undefined;
+
+    const inputSpec = ctx.resultPool.getPColumnSpecByRef(inputRef);
+    if (inputSpec === undefined) return undefined;
+
+    return inputSpec.axesSpec
+      .slice(1)
+      .filter((axis) => axis.name !== READ_INDEX_AXIS)
+      .map((axis) => axis.annotations?.["pl7.app/label"] ?? axis.name);
   })
 
   // FastQC progress form logs
@@ -156,6 +174,9 @@ export type BlockOutputs = InferOutputsType<typeof platforma>;
 // ---------------------------------------------------------------------------
 // Internals
 // ---------------------------------------------------------------------------
+
+/** Axis of the read (R1, R2, I1, I2) in a FASTQ dataset */
+const READ_INDEX_AXIS = "pl7.app/sequencing/readIndex";
 
 /** Whether the run's outputs carry the HTML reports; results of earlier block versions do not. */
 const hasHtmlReports = (outputs: TreeNodeAccessor | undefined): boolean =>

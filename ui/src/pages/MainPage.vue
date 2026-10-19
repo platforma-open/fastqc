@@ -32,11 +32,12 @@ const app = useApp();
 const data = reactive<{
   settingsOpen: boolean;
   fastqcReportOpen: boolean;
-  selectedSample: string | undefined;
+  /** `resultKeyId` of the row whose reports are open */
+  selectedRow: string | undefined;
 }>({
   settingsOpen: app.model.data.refData === undefined,
   fastqcReportOpen: false,
-  selectedSample: undefined,
+  selectedRow: undefined,
 });
 
 // Close the settings once the run starts, so the progress table is in view
@@ -53,8 +54,11 @@ const onGridReady = (params: GridReadyEvent) => {
   gridApi.value = params.api;
 };
 type FastQCOverviewRow = {
+  id: string;
   sampleId: string;
   sampleLabel: string;
+  /** Lane and tags of the row, in the order of `subKeyLabels` */
+  subKey: string[];
   progress: string;
 };
 /** Rows for ag-table */
@@ -62,16 +66,25 @@ const resultsComputed = computed<FastQCOverviewRow[] | undefined>(() => {
   if (resultMap.value === undefined) return undefined;
   const rows: FastQCOverviewRow[] = [];
   for (const id in resultMap.value) {
+    const entry = resultMap.value[id];
     rows.push({
-      sampleId: id,
-      sampleLabel: resultMap.value[id].sampleLabel,
-      progress: resultMap.value[id].progress,
+      id,
+      sampleId: entry.sampleId,
+      sampleLabel: entry.sampleLabel,
+      subKey: entry.subKey,
+      progress: entry.progress,
     });
   }
 
   // Samples arrive in the order their results do, which changes between updates. Like the
-  // standard data table, rows are ordered by their key (the sample id) unless a column is sorted.
-  return rows.sort((a, b) => (a.sampleId < b.sampleId ? -1 : a.sampleId > b.sampleId ? 1 : 0));
+  // standard data table, rows are ordered by their key (sample id, then lane and tags) unless a
+  // column is sorted.
+  const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+  return rows.sort(
+    (a, b) =>
+      compare(a.sampleId, b.sampleId) ||
+      a.subKey.reduce((r, v, i) => r || compare(v, b.subKey[i] ?? ""), 0),
+  );
 });
 
 const results = refDebounced(resultsComputed, 100);
@@ -86,8 +99,11 @@ const overlayParams = computed(() =>
       },
 );
 
+// Labels of the lane and tag columns; none for a dataset with one report per sample and read
+const subKeyLabels = computed(() => app.model.outputs.subKeyLabels ?? []);
+
 // How to display content in table
-const columnDefs: ColDef[] = [
+const columnDefs = computed((): ColDef[] => [
   {
     colId: "label",
     field: "sampleLabel",
@@ -100,6 +116,14 @@ const columnDefs: ColDef[] = [
       invokeRowsOnDoubleClick: true,
     },
   },
+  ...subKeyLabels.value.map(
+    (label, i): ColDef<FastQCOverviewRow> => ({
+      colId: `subKey${i}`,
+      headerName: label,
+      valueGetter: (params) => params.data?.subKey[i],
+      sortable: true,
+    }),
+  ),
   createAgGridColDef<FastQCOverviewRow, string>({
     colId: "fastqc",
     field: "progress",
@@ -121,13 +145,13 @@ const columnDefs: ColDef[] = [
       }
     },
   }),
-];
+]);
 
 const gridOptions: GridOptions = {
-  getRowId: (row) => row.data.sampleId,
+  getRowId: (row) => row.data.id,
   onRowDoubleClicked: (e) => {
-    data.selectedSample = e.data?.sampleId;
-    data.fastqcReportOpen = data.selectedSample !== undefined;
+    data.selectedRow = e.data?.id;
+    data.fastqcReportOpen = data.selectedRow !== undefined;
   },
   components: {
     PlAgTextAndButtonCell,
@@ -139,6 +163,16 @@ const defaultColDef: ColDef = {
   lockPinned: true,
   sortable: false,
 };
+
+// The sample of the open row, then its lane and tags, e.g. "Sample 1, Lane 001"
+const reportTitle = computed(() => {
+  const entry = data.selectedRow ? resultMap.value?.[data.selectedRow] : undefined;
+  if (entry === undefined) return "...";
+  return [
+    entry.sampleLabel,
+    ...entry.subKey.map((value, i) => `${subKeyLabels.value[i] ?? ""} ${value}`.trim()),
+  ].join(", ");
+});
 
 function setInput(inputRef?: PlRef) {
   app.model.data.refData = inputRef;
@@ -192,12 +226,7 @@ function setInput(inputRef?: PlRef) {
 
   <!-- Slide window with results -->
   <PlSlideModal v-model="data.fastqcReportOpen" width="min(1250px, 95%)">
-    <template #title>
-      Results for
-      {{
-        (data.selectedSample ? app.model.outputs.labels?.[data.selectedSample] : undefined) ?? "..."
-      }}
-    </template>
-    <ReportPanel v-model="data.selectedSample" />
+    <template #title> Results for {{ reportTitle }} </template>
+    <ReportPanel v-model="data.selectedRow" />
   </PlSlideModal>
 </template>
