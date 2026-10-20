@@ -99,3 +99,32 @@ blockTest("multi-lane input", { timeout: 400000 }, async ({ rawPrj, helpers, exp
   ];
   expect(result).toEqual({ r1: keys, r2: keys, subKeyLabels: ["Lane"] });
 });
+
+// Tag axes come before the lane; each tag and lane combination gets its own reports, keyed and
+// labelled in axis order
+blockTest("tagged input", { timeout: 400000 }, async ({ rawPrj, helpers, expect }) => {
+  const result = await runOnDataset({ rawPrj, helpers }, (R1, R2) => ({
+    type: "TaggedFastq",
+    readIndices: ["R1", "R2"],
+    gzipped: true,
+    hasLanes: true,
+    tags: ["PLATE", "WELL"],
+    data: {
+      [SAMPLE_ID]: [
+        { tags: { PLATE: "P1", WELL: "A1" }, lane: "L001", files: { R1, R2 } },
+        { tags: { PLATE: "P1", WELL: "B2" }, lane: "L002", files: { R1, R2 } },
+        { tags: { PLATE: "P2", WELL: "A1" }, lane: "L001", files: { R1, R2 } },
+      ],
+    },
+  }));
+  const keys = [
+    [SAMPLE_ID, "P1", "A1", "L001"],
+    [SAMPLE_ID, "P1", "B2", "L002"],
+    [SAMPLE_ID, "P2", "A1", "L001"],
+  ];
+  expect(result).toEqual({
+    r1: keys,
+    r2: keys,
+    subKeyLabels: ["PLATE tag", "WELL tag", "Lane"],
+  });
+});
