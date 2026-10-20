@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.fastqc.workflow
 
+## 2.3.4
+
+### Patch Changes
+
+- 0d979a5: Release every package through npm trusted publishing (OIDC) so each package's trusted publisher is used before it expires.
+
 ## 2.3.3
 
 ### Patch Changes

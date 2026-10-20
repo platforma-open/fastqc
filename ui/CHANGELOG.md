@@ -1,5 +1,13 @@
 # @platforma-open/milaboratories.fastqc.ui
 
+## 2.1.5
+
+### Patch Changes
+
+- 0d979a5: Release every package through npm trusted publishing (OIDC) so each package's trusted publisher is used before it expires.
+- Updated dependencies [0d979a5]
+  - @platforma-open/milaboratories.fastqc.model@2.2.2
+
 ## 2.1.4
 
 ### Patch Changes
