@@ -11,14 +11,15 @@ import type { Read } from "./results";
 import { PROGRESS_DONE, resultMap } from "./results";
 
 const app = useApp();
-const sampleId = defineModel<string | undefined>();
+/** `resultKeyId` of the shown row: a sample, or one lane or tag group of it */
+const rowId = defineModel<string | undefined>();
 
 const reactiveFileContent = ReactiveFileContent.useGlobal();
 
 // Button labels displayed on top of sliding window to define tabs by PlBtnGroup
 // Tabs: the sample's reads, or both while they are not known
 const reads = computed<readonly Read[]>(
-  () => (sampleId.value ? resultMap.value?.[sampleId.value]?.reads : undefined) ?? ["R1", "R2"],
+  () => (rowId.value ? resultMap.value?.[rowId.value]?.reads : undefined) ?? ["R1", "R2"],
 );
 const options = computed(() => reads.value.map((read) => ({ label: read, value: read })));
 
@@ -31,7 +32,7 @@ const currentView = computed<Read>({
 });
 
 const sampleReports = computed(() => {
-  const id = sampleId.value;
+  const id = rowId.value;
   if (id === undefined) return undefined;
   return resultMap.value?.[id]?.reports;
 });
@@ -59,7 +60,7 @@ const currentFrame = computed(() => frames.value.find((f) => f.read === currentV
 
 // A finished sample without this report has no such read (single-end data, read list unknown)
 const sampleDone = computed(() => {
-  const id = sampleId.value;
+  const id = rowId.value;
   return id !== undefined && resultMap.value?.[id]?.progress === PROGRESS_DONE;
 });
 
@@ -69,7 +70,7 @@ const sampleDone = computed(() => {
 // section, and an external link is offered for copying instead of being followed.
 const blockedLink = ref<string>();
 const copied = ref(false);
-watch([sampleId, currentView], () => (blockedLink.value = undefined));
+watch([rowId, currentView], () => (blockedLink.value = undefined));
 
 function onReportLoad(event: Event) {
   const doc = (event.target as HTMLIFrameElement).contentDocument;
@@ -117,7 +118,7 @@ async function copyLink() {
 // Jumps within it fire no `load`; any load after its own one is a navigation away, answered by
 // loading the report into the frame again.
 let folderFrameLoads: Partial<Record<Read, number>> = {};
-watch(sampleId, () => (folderFrameLoads = {}));
+watch(rowId, () => (folderFrameLoads = {}));
 function onFolderReportLoad(event: Event, read: Read, url: string) {
   folderFrameLoads[read] = (folderFrameLoads[read] ?? 0) + 1;
   if (folderFrameLoads[read] > 1) {

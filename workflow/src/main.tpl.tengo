@@ -1,6 +1,7 @@
 wf := import("@platforma-sdk/workflow-tengo:workflow")
 assets := import("@platforma-sdk/workflow-tengo:assets")
 llPFrames := import("@platforma-sdk/workflow-tengo:pframes.ll")
+pSpec := import("@platforma-sdk/workflow-tengo:pframes.spec")
 
 // FastQC program template
 fastqcTpl := assets.importTemplate(":fastqc")
@@ -30,9 +31,13 @@ wf.body(func(args) {
 		name: "fastQCstdout"
 	}]
 
-	// Groups the files by sample (axis 0), so each run gets that sample's reads keyed by read index
+	// FastQC runs once per key of the other axes (the sample, plus its lane and tags in datasets
+	// that have them) and gets that key's reads keyed by read index. For a [sample, readIndex]
+	// dataset this is axis 1, as it always was, so earlier runs are still reused from cache.
+	readIndexAxis := pSpec.matchAxis(input.spec.axesSpec, "pl7.app/sequencing/readIndex")
+
 	fastqcResults := llPFrames.aggregate(
-		input.data, [1], fastqcTpl,
+		input.data, [readIndexAxis], fastqcTpl,
 		aggregationTargets,
 		false,
 		{

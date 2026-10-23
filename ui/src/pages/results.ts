@@ -25,7 +25,11 @@ export const PROGRESS_DONE = "done";
 export type Report = { html: LocalBlobHandle } | { folder: string };
 
 export type ResultEntry = {
+  sampleId: string;
   sampleLabel: string;
+  /** The key's values after the sample (lane, tags), matching `subKeyLabels`; empty when the
+   * dataset has no such axes */
+  subKey: string[];
   progress: string;
   /** The sample's reads; undefined until its step has started */
   reads?: Read[];
@@ -56,7 +60,13 @@ function samplePercent(line: string | undefined, reads: readonly Read[]): number
   return Math.floor((index * 100 + filePercent) / reads.length);
 }
 
-// return a map of sampleId => ResultEntry
+/**
+ * Id of a result row. FastQC runs once per key of the input axes other than the read: the sample,
+ * plus its lane and tags in datasets that have them. Each run is one row.
+ */
+export const resultKeyId = (key: readonly unknown[]): string => JSON.stringify(key.map(String));
+
+// return a map of resultKeyId => ResultEntry
 // (undefined until the block has been run and produced any sample)
 export const resultMap = computed((): Record<string, ResultEntry> | undefined => {
   const app = useApp();
@@ -67,44 +77,45 @@ export const resultMap = computed((): Record<string, ResultEntry> | undefined =>
 
   const progressLines: Record<string, string | undefined> = {};
   for (const { key, value } of outputs.fastqcProgressLine?.data ?? [])
-    progressLines[String(key[0])] = value?.progressLine;
+    progressLines[resultKeyId(key)] = value?.progressLine;
 
   // Each sample's state per read, from the report maps: once its step starts, every sample has an
   // entry for every read, `null` when it has no such read, `undefined` while the report is not
   // ready, then the report (for results of earlier versions, from the archives)
   const readStates: Record<string, Partial<Record<Read, "absent" | "pending" | Report>>> = {};
-  const setState = (sampleId: string, read: Read, state: "absent" | "pending" | Report) =>
-    ((readStates[sampleId] ??= {})[read] = state);
+  const setState = (id: string, read: Read, state: "absent" | "pending" | Report) =>
+    ((readStates[id] ??= {})[read] = state);
   for (const [read, html, zip] of [
     ["R1", outputs.FastQChtmlR1, outputs.FastQCzipR1],
     ["R2", outputs.FastQChtmlR2, outputs.FastQCzipR2],
   ] as const) {
     for (const { key, value } of html?.data ?? [])
       setState(
-        String(key[0]),
+        resultKeyId(key),
         read,
         value === null ? "absent" : value ? { html: value.handle } : "pending",
       );
     for (const { key, value } of zip?.data ?? [])
       setState(
-        String(key[0]),
+        resultKeyId(key),
         read,
         value === null ? "absent" : value ? { folder: value } : "pending",
       );
   }
 
-  const sampleIds = new Set<string>([
-    ...(outputs.fastqcProgress?.data ?? []).map((it) => String(it.key[0])),
+  const ids = new Set<string>([
+    ...(outputs.fastqcProgress?.data ?? []).map((it) => resultKeyId(it.key)),
     ...Object.keys(progressLines),
     ...Object.keys(readStates),
   ]);
   // No samples yet: keep the loader up until the sample map is final. `isRunning` cannot tell, it
   // reads false right after Run, before the workflow outputs exist.
-  if (sampleIds.size === 0) return outputs.fastqcProgress?.isComplete ? {} : undefined;
+  if (ids.size === 0) return outputs.fastqcProgress?.isComplete ? {} : undefined;
 
   const r: Record<string, ResultEntry> = {};
-  for (const sampleId of sampleIds) {
-    const states = readStates[sampleId] ?? {};
+  for (const id of ids) {
+    const [sampleId, ...subKey] = JSON.parse(id) as string[];
+    const states = readStates[id] ?? {};
     // The sample's reads are known once both reads have an entry; until then completion is unknown
     const reads: Read[] | undefined =
       states.R1 !== undefined && states.R2 !== undefined
@@ -115,18 +126,20 @@ export const resultMap = computed((): Record<string, ResultEntry> | undefined =>
       const state = states[read];
       if (typeof state === "object") sampleReports[read] = state;
     }
-    const percent = samplePercent(progressLines[sampleId], reads ?? []);
+    const percent = samplePercent(progressLines[id], reads ?? []);
 
     let progress: string;
     if (reads !== undefined && reads.length > 0 && reads.every((read) => sampleReports[read]))
       progress = PROGRESS_DONE;
-    else if (!progressLines[sampleId]?.trim()) progress = PROGRESS_QUEUED;
+    else if (!progressLines[id]?.trim()) progress = PROGRESS_QUEUED;
     else if (percent === undefined) progress = PROGRESS_STARTED;
     else if (percent >= 100) progress = PROGRESS_REPORT;
     else progress = String(percent);
 
-    r[sampleId] = {
+    r[id] = {
+      sampleId,
       sampleLabel: labels[sampleId] ?? sampleId,
+      subKey,
       progress,
       reads,
       reports: sampleReports,
