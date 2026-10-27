@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.fastqc
 
+## 2.3.5
+
+### Patch Changes
+
+- a6009e3: Update FastQC to the versions with the rebuilt Docker images. The old images trust the compromised eMudhra intermediate CAs.
+
 ## 2.3.4
 
 ### Patch Changes
