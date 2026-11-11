@@ -7,13 +7,13 @@ packages:
   - workflow
 
 catalog:
-  "@platforma-sdk/model": 1.85.0
-  "@platforma-sdk/ui-vue": 1.85.0
-  "@platforma-sdk/workflow-tengo": 6.16.0
-  "@platforma-sdk/block-tools": 2.16.13
-  "@platforma-sdk/test": 1.85.0
-  "@platforma-sdk/tengo-builder": 4.1.11
-  "@platforma-sdk/package-builder": 3.16.1
+  "@platforma-sdk/model": 1.88.16
+  "@platforma-sdk/ui-vue": 1.88.16
+  "@platforma-sdk/workflow-tengo": 6.22.2
+  "@platforma-sdk/block-tools": 2.19.1
+  "@platforma-sdk/test": 1.88.16
+  "@platforma-sdk/tengo-builder": 4.1.21
+  "@platforma-sdk/package-builder": 3.17.0
   "@platforma-sdk/blocks-deps-updater": ^2.0.0
   "@platforma-open/babraham.software-fastqc": ^1.0.13
   "@platforma-open/milaboratories.samples-and-data": 1.24.0
@@ -25,18 +25,28 @@ catalog:
   'ag-grid-enterprise': &ag-grid ~34.1.2
   'ag-grid-vue3': *ag-grid
 
-  "vue": 3.5.24
+  "vue": 3.5.44
   '@vueuse/core': ^13.6.0
 
   "typescript": ^5.7.2
-  "turbo": ^2.5.2
+  "turbo": ~2.11.10
   "vitest": ~4.1.11
 
   "unzipper": "^0.12.3"
   "@changesets/cli": ^2.29.2
-  "@platforma-sdk/block-kind": 1.1.0
-  "@milaboratories/ts-builder": 1.7.2
-  "@milaboratories/ts-configs": 1.4.0
-  "@milaboratories/helpers": 1.14.5
+  "@platforma-sdk/block-kind": 1.1.1
+  "@milaboratories/ts-builder": 1.8.0
+  "@milaboratories/ts-configs": 1.4.1
+  "@milaboratories/helpers": 1.14.7
   shx: ~0.4.0
   "es-toolkit": 1.41.0
+  cross-env: ~10.1.0
+minimumReleaseAgeExclude:
+  - "@milaboratories/*"
+  - "@platforma-sdk/*"
+  - "@platforma-open/*"
+allowBuilds:
+  "@milaboratories/tengo-tester": false
+  esbuild: false
+  protobufjs: false
+  "@milaboratories/pframes-rs-node": true
