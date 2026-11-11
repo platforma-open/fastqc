@@ -116,14 +116,12 @@ const columnDefs = computed((): ColDef[] => [
       invokeRowsOnDoubleClick: true,
     },
   },
-  ...subKeyLabels.value.map(
-    (label, i): ColDef<FastQCOverviewRow> => ({
-      colId: `subKey${i}`,
-      headerName: label,
-      valueGetter: (params) => params.data?.subKey[i],
-      sortable: true,
-    }),
-  ),
+  ...subKeyLabels.value.map((label, i): ColDef<FastQCOverviewRow> => ({
+    colId: `subKey${i}`,
+    headerName: label,
+    valueGetter: (params) => params.data?.subKey[i],
+    sortable: true,
+  })),
   createAgGridColDef<FastQCOverviewRow, string>({
     colId: "fastqc",
     field: "progress",
